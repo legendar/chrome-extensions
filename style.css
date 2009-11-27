@@ -1,0 +1,9 @@
+
+div.auto-translate-dialog {
+    position: fixed;
+    top: 0; left: 0;
+    border: 2px solid navy;
+    background: #363636;
+    color: #FAFAFA;
+    font-size: 20px;
+}

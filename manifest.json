@@ -1,0 +1,25 @@
+{
+ "name": "Auto-Translate",
+ "version": "1.0",
+ "description": "Automatically translate selection text by goolge translate",
+
+ "background_page": "translate.html",
+
+ "permissions": [
+  "tabs", 
+  "http://ajax.googleapis.com/*"
+ ],
+
+ /*"browser_action": { // Элементы браузера
+  "default_title": "test" // Название кнопки
+ },*/
+
+ //"options_page": "options.html" // Страница настроек
+ "content_scripts": [{
+    "matches": ["http://*/*"],
+    "css": ["style.css"],
+    "js": ["script.js"],
+    "all_frames": "true"
+  }]
+
+}

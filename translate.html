@@ -1,0 +1,68 @@
+<html>
+<head>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load("language", "1");
+        
+        var ports = [];
+
+        var options = {
+            /*
+             * 0 - to
+             * 1 - to 2 - when selected is language from 0
+             * 2 - from - * - all
+             */
+            languages: {
+                from: '*',
+                to: 'ru',
+                to2: 'en',
+                additionalDetection: true
+            },
+        }
+
+        chrome.extension.onConnect.addListener(function(port) {
+            ports[port.tab.id] = port;
+            port.onMessage.addListener(function(m) {
+                switch(m.message) {
+                    case 'translate': 
+                        translate(m.text, port.tab.id);
+                        break;
+                }
+            });
+        });
+
+        function translate(text, id) {
+            function translate(text, from) {
+                var to = options.languages.to;
+                if(from == to) {
+                    to = options.languages.to2;
+                }
+                google.language.translate(text, from, to, function(result) {
+                    if (result.translation) {
+                        if(options.languages.additionalDetection && 
+                           result.translation.toLowerCase() == text.toLowerCase() && 
+                           to != options.languages.to2 && to == options.languages.to) {
+                            return translate(text, options.languages.to);
+                        }
+                        ports[id].postMessage({
+                            message: 'result',
+                            result: result
+                        });
+                    }
+                });
+            }
+            
+            if(options.languages.from == '*') {
+                google.language.detect(text, function(result) {
+                    if(!result.error && result.language) {
+                        translate(text, result.language);
+                    }
+                });
+            } else {
+                translate(text, options.languages.from);
+            }
+        }
+    </script>
+</head>
+<body></body>
+</html>
