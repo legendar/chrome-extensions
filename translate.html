@@ -1,24 +1,26 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Auto translate plugin for Google Chrome</title>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">
         google.load("language", "1");
-        
+    </script>
+    <script type="text/javascript">
         var ports = [];
-
         var options = {
             /*
              * 0 - to
              * 1 - to 2 - when selected is language from 0
              * 2 - from - * - all
              */
-            languages: {
-                from: '*',
-                to: 'ru',
-                to2: 'en',
-                additionalDetection: true
-            },
-        }
+            from: '*',
+            first: 'ru',
+            second: 'en',
+            additionalDetection: true,
+            convertToLowerCase: true
+        };
 
         chrome.extension.onConnect.addListener(function(port) {
             ports[port.tab.id] = port;
@@ -31,35 +33,66 @@
             });
         });
 
-        function translate(text, id) {
-            function translate(text, from) {
-                var to = options.languages.to;
-                if(from == to) {
-                    to = options.languages.to2;
+        function _translate(text, from, to, callback) {
+            var url = 'http://translate.google.com/translate_a/t?client=t&otf=1&pc=0';
+            url += '&text=' + text;
+            url += '&hl=' + options.first;
+            url += '&sl=' + from;
+            url += '&tl=' + to;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    // JSON.parse does not evaluate the attacker's scripts.
+                    callback(JSON.parse(xhr.responseText));
                 }
-                google.language.translate(text, from, to, function(result) {
-                    if (result.translation) {
-                        if(options.languages.additionalDetection && 
-                           result.translation.toLowerCase() == text.toLowerCase() && 
-                           to != options.languages.to2 && to == options.languages.to) {
-                            return translate(text, options.languages.to);
+            }
+            xhr.send();
+        }
+
+        function translate(text, id) {
+            if(options.convertToLowerCase) {
+                text = text.toLowerCase();
+            }
+
+            function translate(text, from) {
+                var to = options.first;
+                if(from == to) {
+                    to = options.second;
+                }
+                _translate(text, from, to, function(result) {
+                    if (result.sentences.length > 0) {
+                        if(options.additionalDetection && 
+                           result.sentences[0].trans.toLowerCase() == result.sentences[0].orig.toLowerCase() && 
+                           to != options.second && to == options.first) {
+                            return translate(text, options.to);
+                        }
+                        var text = result.sentences[0].trans;
+                        if(result.dict && result.dict.length > 0) {
+                            text += '<br />';
+                            for(dict in result.dict) {
+                                if(result.dict[dict].pos.length > 0) {
+                                    text += '<b>' + result.dict[dict].pos + '</b> ';
+                                }
+                                text += '<i>' + result.dict[dict].terms.join(', ') + '</i><br />';
+                            }
                         }
                         ports[id].postMessage({
                             message: 'result',
-                            result: result
+                            result: text
                         });
                     }
                 });
             }
             
-            if(options.languages.from == '*') {
+            if(options.from == '*') {
                 google.language.detect(text, function(result) {
                     if(!result.error && result.language) {
                         translate(text, result.language);
                     }
                 });
             } else {
-                translate(text, options.languages.from);
+                translate(text, options.from);
             }
         }
     </script>
