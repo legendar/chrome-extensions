@@ -10,11 +10,6 @@
     <script type="text/javascript">
         var ports = [];
         var options = {
-            /*
-             * 0 - to
-             * 1 - to 2 - when selected is language from 0
-             * 2 - from - * - all
-             */
             from: '*',
             first: 'ru',
             second: 'en',
@@ -23,11 +18,11 @@
         };
 
         chrome.extension.onConnect.addListener(function(port) {
-            ports[port.tab.id] = port;
+            ports[port.portId_] = port;
             port.onMessage.addListener(function(m) {
                 switch(m.message) {
                     case 'translate': 
-                        translate(m.text, port.tab.id);
+                        translate(m.text, port.portId_);
                         break;
                 }
             });
@@ -65,21 +60,26 @@
                         if(options.additionalDetection && 
                            result.sentences[0].trans.toLowerCase() == result.sentences[0].orig.toLowerCase() && 
                            to != options.second && to == options.first) {
-                            return translate(text, options.to);
+                            return translate(result.sentences[0].orig, options.first);
                         }
                         var text = result.sentences[0].trans;
+                        var textAdditional = null;
                         if(result.dict && result.dict.length > 0) {
                             text += '<br />';
+                            textAdditional = '';
                             for(dict in result.dict) {
                                 if(result.dict[dict].pos.length > 0) {
-                                    text += '<b>' + result.dict[dict].pos + '</b> ';
+                                    textAdditional += '<b>' + result.dict[dict].pos + '</b> ';
                                 }
-                                text += '<i>' + result.dict[dict].terms.join(', ') + '</i><br />';
+                                textAdditional += '<i>' + result.dict[dict].terms.join(', ') + '</i><br />';
                             }
                         }
                         ports[id].postMessage({
                             message: 'result',
-                            result: text
+                            result: {
+                                text: text,
+                                textAdditional: textAdditional
+                            }
                         });
                     }
                 });

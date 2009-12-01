@@ -1,48 +1,120 @@
 
 new function() {
     var o = this;
+    
+    this.selection = null;
 
-    var options = {
+    this.options = {
         maxWidth: 300,
         color: 'fafafa',
         background: '363636',
         opacity: 0.8,
         border: '000000',
-        borderWidth: 3,
-        fontSize: 12
-    }
-    
+        borderWidth: 0,
+        borderRadius: 10,
+        fontSize: 16,
+        fontSizeAdditional: 14,
+        padding: 8,
+
+        offset: 3,
+
+        resetSelection: false
+    };
+
     this.dialog = document.createElement('div');
-    this.dialog.style.display = 'none';
     this.dialog.id = 'auto-translate-dialog';
     this.dialog.setAttribute('style', 
-        'max-width: ' + options.maxWidth + 'px;' +
-        'color: #' + options.color + ';' +
-        'opacity: ' + options.opacity + ';' +
-        'border-color: #' + options.border + ';' +
-        'border-width: ' + options.borderWidth + 'px;' +
-        'background: #' + options.background + ';' +
-        'font-size: #' + options.fontSize + 'px;' +
-        'position: fixed; top: 0; left: 0;'
+        'max-width: ' + this.options.maxWidth + 'px !important;' +
+        'color: #' + this.options.color + ' !important;' +
+        'opacity: ' + this.options.opacity + ' !important;' +
+        'border-color: #' + this.options.border + ' !important;' +
+        'border-width: ' + this.options.borderWidth + 'px !important;' +
+        '-webkit-border-radius: ' + this.options.borderRadius + 'px !important;' +
+        'background-color: #' + this.options.background + ' !important;' +
+        'font-size: ' + this.options.fontSize + 'px !important;' +
+        'padding: ' + this.options.padding + 'px !important;' +
+        'position: absolute !important; overflow: visible;' +
+        'background-image: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #000), color-stop(50%, #363636), color-stop(100%, #000));' +
+        //'position: fixed !important; top: 0 !important; left: 0 !important;' +
+        'z-index: 999999'
     );
+    this.dialogA = document.createElement('span');
+    //this.dialogA.id = 'auto-translate-dialog-additional';
+    this.dialogA.setAttribute('style', 
+        'color: #' + this.options.color + ' !important;' +
+        'font-size: ' + this.options.fontSizeAdditional + 'px !important;'
+    );
+    this.dialog.appendChild(this.dialogA);
     document.body.appendChild(this.dialog);
+    this.dialog.style.display = 'none';
+
+    this.branding = document.createElement('img');
+    this.branding.src = 'http://www.google.com/uds/css/small-logo.png';
+    this.branding.onclick = function(){ document.location.href='http://google.com/'; };
+    this.branding.setAttribute('style', 'position: absolute; z-index: -1; right: 1px; top: -20px; cursor: pointer;'+
+        '-webkit-border-radius: 20px; background-color: rgba(200, 200, 200, 0.3); padding: 3px 5px 0;'
+        //'background-image: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #000), color-stop(50%, #363636), color-stop(100%, #000));'
+    );
     
     this.port = chrome.extension.connect();
     this.port.onMessage.addListener(function(m) {
         switch(m.message) {
             case 'result':
-                o.dialog.innerHTML = m.result;
+                //o.dialogA = o.dialog.removeChild(o.dialogA);
+                o.dialog.innerHTML = m.result.text;
+                if(m.result.textAdditional) {
+                    o.dialogA.innerHTML = m.result.textAdditional;
+                    o.dialog.appendChild(o.dialogA);
+                }
                 o.dialog.style.display = '';
+                o.fixDialogPosition();
+                if(o.selection && o.options.resetSelection) {
+                    o.selection.empty();
+                    o.selection = null;
+                }
+                o.dialog.appendChild(o.branding);
                 break;
         }
     });
+    
+    this.fixDialogPosition = function() {
+        if(!o.selection) {
+            o.dialog.style.top = '0';
+            o.dialog.style.left = '0';
+            return;
+        }
+        
+        function getOffsets(el) {
+            var l = t = 0;
+            do {
+                l += el.offsetLeft || 0;
+                t += el.offsetTop || 0;
+                el = el.offsetParent || null;
+            } while (el);
+            return {'top': t, 'left': l};
+        }
+        
+        var tmpNode = document.createElement('span');
+        o.selection.getRangeAt(0).insertNode(tmpNode);
+        offsets = getOffsets(tmpNode);
+        tmpNode.parentNode.removeChild(tmpNode);
+        delete tmpNode;
+
+        if(offsets.top - document.body.scrollTop >= o.dialog.offsetHeight) {
+            o.dialog.style.top = (offsets.top - o.dialog.offsetHeight - o.options.offset) + 'px';
+        } else {
+            o.dialog.style.top = (offsets.top + 20 + o.options.offset) + 'px';
+        }
+        o.dialog.style.left = offsets.left + 'px';
+    };
 
     document.body.addEventListener('mouseup', function(e) {
         if(!(e.ctrlKey && !e.shiftKey && !e.altKey)) {
             return;
         }
 
-        var text = window.getSelection() + '';
+        o.selection = window.getSelection();
+        var text = o.selection.toString();
         if(text.length < 1) {
             return;
         }
