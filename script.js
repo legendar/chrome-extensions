@@ -18,7 +18,26 @@ new function() {
 
         offset: 3,
 
-        resetSelection: false
+        resetSelection: false,
+        
+        languages: [
+            {
+                keys: 'ctrl',
+                from: 'en',
+                first: 'ru',
+                second: 'en',
+                additionalDetection: false,
+                convertToLowerCase: false
+            },
+            {
+                keys: 'ctrl|alt',
+                from: '*',
+                first: 'ru',
+                second: 'en',
+                additionalDetection: true,
+                convertToLowerCase: true
+            }
+        ],
     };
 
     this.dialog = document.createElement('div');
@@ -50,9 +69,10 @@ new function() {
 
     this.branding = document.createElement('img');
     this.branding.src = 'http://www.google.com/uds/css/small-logo.png';
-    this.branding.onclick = function(){ document.location.href='http://google.com/'; };
-    this.branding.setAttribute('style', 'position: absolute; z-index: -1; right: 1px; top: -20px; cursor: pointer;'+
-        '-webkit-border-radius: 20px; background-color: rgba(200, 200, 200, 0.3); padding: 3px 5px 0;'
+    this.branding.onclick = function(){ document.location.href='http://translate.google.com/'; };
+    this.branding.setAttribute('style', 'position: absolute !important; z-index: -1 !important; right: 1px !important; top: -20px !important; cursor: pointer !important;'+
+        '-webkit-border-radius: 20px; background-color: rgba(200, 200, 200, 0.3) !important; padding: 3px 5px 0 !important;'+
+        ' margin: 0 !important;'
         //'background-image: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #000), color-stop(50%, #363636), color-stop(100%, #000));'
     );
     

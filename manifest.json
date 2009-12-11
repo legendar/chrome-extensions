@@ -1,6 +1,6 @@
 {
  "name": "Auto-Translate",
- "version": "1.0",
+ "version": "1.0.1",
  "description": "Automatically translate selection text by goolge translate",
  "background_page": "translate.html",
  "permissions": [
@@ -17,7 +17,7 @@
     "256": "icons/tranlation.png"
  },
  "content_scripts": [{
-    "matches": ["http://*/*"],
+    "matches": ["http://*/*", "https://*/*"],
     "js": ["script.js"],
     "all_frames": "true"
   }]
