@@ -8,6 +8,50 @@
         google.load("language", "1");
     </script>
     <script type="text/javascript">
+        function clone(obj) {
+            var ret = {};
+            for (p in obj) {
+                ret[p] = (typeof obj[p] == 'object') ? clone(obj[p]) : obj[p];
+            }
+            return ret;
+        }
+        
+        var defaults = {
+            from: {
+                'type': 'lang',
+                'value': '*',
+                'values': ['*']
+            },
+            first: {
+                'type': 'lang',
+                'value': 'ru',
+                'values': ['*']
+            },
+            second: {
+                'type': 'lang',
+                'value': 'en',
+                'values': ['*']
+            },
+            detection: {
+                'type': 'checkbox',
+                'value': true,
+            },
+            lowercase: {
+                'type': 'checkbox',
+                'value': true,
+            }
+        };
+
+        if(!localStorage.hotkeys) {
+            localStorage = {
+                hotkeys: {
+                    'Ctrl+Selection': clone(storage.defaults),
+                    'Selection': clone(storage.defaults)
+                },
+                defaults: defaults
+            };
+        }
+        
         var ports = [];
         var options = {
             from: '*',
@@ -26,6 +70,12 @@
                 switch(m.message) {
                     case 'translate': 
                         translate(m.text, port.portId_);
+                        break;
+                    case 'options':
+                        port.postMessage({
+                            message: 'options',
+                            result: localStorage
+                        });
                         break;
                 }
             });

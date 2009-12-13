@@ -3,6 +3,7 @@
  "version": "1.0.1",
  "description": "Automatically translate selection text by goolge translate",
  "background_page": "translate.html",
+ "options_page": "options.html",
  "permissions": [
   "tabs", 
   "http://ajax.googleapis.com/*",

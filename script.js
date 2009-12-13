@@ -1,4 +1,6 @@
 
+console.log(localStorage);
+
 new function() {
     var o = this;
     

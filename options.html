@@ -1,0 +1,282 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Options :: Auto-translate plugin for Google Chrome</title>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script>
+        //google.load("ext-core", "3.0.0");
+        google.load("language", "1");
+    </script>
+    <script type="text/javascript">
+        var defaults;
+        var storage = null;
+        var lastTab = null;
+        var keys = ['Ctrl', 'Alt', 'Shift', 'Meta']
+
+        function $(id) {
+            return document.getElementById(id);
+        }
+        
+        function clone(obj) {
+            var ret = {};
+            for (p in obj) {
+                ret[p] = (typeof obj[p] == 'object') ? clone(obj[p]) : obj[p];
+            }
+            return ret;
+        }
+
+        function read() {
+            storage = localStorage;
+            defaults = localStorage.defaults;
+            
+            var t = null;
+            for(h in storage.hotkeys) {
+                if(t == null) {
+                    t = h;
+                }
+                add(h);
+            }
+
+            for(id in storage) {
+                if(id == 'hotkeys') {
+                    continue;
+                }
+                l(id, storage[id]);
+            }
+
+            tab(t);
+        }
+
+        function write() {
+            for(id in storage) {
+                if(id == 'hotkeys') {
+                    continue;
+                }
+                s(id, storage[id]);
+            }
+            
+            save(lastTab);
+            
+            localStorage = storage;
+        }
+
+        function l(id, o) {
+            switch(o.type) {
+                case 'lang':
+                    // load allowed languages
+                    if($(id).options.length == 1) {
+                        var langs = '';
+                        if(id == 'from') {
+                            langs += '<option value="auto">Auto-detect language</option>';
+                            langs += '<option value="-" disabled="disabled">-</option>';
+                        }
+                        for(lng in google.language.Languages) {
+                            var name = lng.substring(0, 1) + lng.substring(1).toLowerCase().replace('_', ' ');
+                            langs += '<option value="' + google.language.Languages[lng] + '">' + name + '</option>'
+                        }
+                        $(id).innerHTML = langs;
+                    }
+                case 'select':
+                    $(id).value = o.value;
+                    break;
+                case 'checkbox':
+                    $(id).checked = o.value;
+                    break;
+
+            }
+        }
+
+        function s(id, o) {
+            switch(o.type) {
+                case 'lang':
+                case 'select':
+                    o.value = $(id).value;
+                    break;
+                case 'checkbox':
+                    o.value = $(id).checked;
+                    break;
+            }
+        }
+
+        function load(id) {
+            for(i in storage.hotkeys[id]) {
+                l(i, storage.hotkeys[id][i]);
+            }
+            var hkeys = id.split('+');
+            for(k in hkeys) {
+                if(hkeys[k] != 'Selection') {
+                    $(hkeys[k]).checked = 'checked';
+                }
+            }
+        }
+
+        function save(id) {
+            var hkeys = [];
+            for(k in keys) {
+                if($(keys[k]).checked) {
+                    hkeys.push(keys[k]);
+                }
+            }
+            hkeys.push('Selection')
+            hkeys = hkeys.join('+');
+            if(id != hkeys) {
+                if(storage.hotkeys[hkeys]) {
+                    // error
+                } else {
+                    storage.hotkeys[hkeys] = storage.hotkeys[id];
+                    delete storage.hotkeys[id];
+                    $(id).innerHTML = hkeys;
+                    $(id).id = hkeys;
+                    id = hkeys;
+                }
+            }
+            for(i in storage.hotkeys[id]) {
+                s(i, storage.hotkeys[id][i]);
+            }
+            return id;
+        }
+
+        function tab(id) {
+            if(lastTab) {
+                lt = save(lastTab);
+                if(!lt) {
+                    return;
+                }
+                lastTab = lt;
+                $(lastTab).className = 'tab';
+            }
+            lastTab = id;
+            $(id).className = 'tab selected';
+            $('Ctrl').checked = ''; $('Alt').checked = ''; $('Shift').checked = ''; $('Meta').checked = '';
+            load(id);
+        }
+
+        function add(id) {
+            id = id || 'new';
+            if(id == 'new' && $(id)) {
+                lt = save(id);
+                if(!lt) {
+                    return;
+                }
+                lastTab = lt
+            }
+            if(!$(id)) {
+                var span = document.createElement('span');
+                span.id = id;
+                span.innerHTML = id;
+                span.className = 'tab';
+                span.onclick = function() {
+                    tab(this.id);
+                };
+                $('tabs').insertBefore(span, $('add'));
+            }
+            tab(id);
+        }
+
+    </script>
+    <style type="text/css">
+        html, body { height: 100%; }
+        body {
+            text-align: center;
+            color: #363636;
+        }
+        label {
+            font-weight: bold;
+        }
+        div.loading {
+            background: #CC1111;
+            float: right;
+            margin-right: 20px;
+            padding: 5px;
+            color: #FAFAFA;
+            display: none;
+        }
+        div.tab-wrapper {
+            width: 70%;
+            margin: 0 auto;
+            z-index: 10;
+            text-align: left;
+        }
+        div.tab-list {
+            z-index: 10;
+            position: relative;
+        }
+        span.tab {
+            z-index: 10;
+            background: #E1E6EE;
+            border: 1px solid #B8CBDE;
+            border-bottom: 0;
+            -webkit-border-top-left-radius: 10px;
+            -webkit-border-top-right-radius: 10px;
+            padding: 3px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        span.tab.selected {
+            padding-bottom: 4px;
+        }
+        span.add {
+            font-weight: bold;
+            cursor: pointer;
+        }
+        div.tab-content {
+            margin-top: 3px;
+            padding: 3px;
+            background: #E1E6EE;
+            border: 1px solid #B8CBDE;
+            min-height: 200px;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body onload="read()">
+    <div class="loading">Loading...</div>
+    <div class="tab-wrapper">
+        <div id="tabs" class="tab-list"><span id="add" class="add" onclick="add();">+ (add profile)</span></div>
+        <div class="tab-content">
+            <h2>Hotkeys</h2>
+            <p>
+                <input type="checkbox" id="Ctrl" /><label for="Ctrl">Ctrl</label> +
+                <input type="checkbox" id="Alt" /><label for="Alt">Alt</label> +
+                <input type="checkbox" id="Shift" /><label for="Shift">Shift</label> +
+                <input type="checkbox" id="Meta" /><label for="Meta">Meta</label> +
+                <label for="selection">Selection</label>
+            </p>
+            <h2>Languages configuration</h2>
+            <p>
+                <label for="from">From</label>
+                <select id="from">
+                    <option>Auto-detect language</option>
+                </select>
+                <i>translate text from selected language</i>
+            </p>
+            <p>
+                <label for="first">First</label>
+                <select id="first">
+                    <option>Auto-detect language</option>
+                </select>
+                <i>translate text to selected language</i>
+            </p>
+            <p>
+                <label for="second">Second</label>
+                <select id="second">
+                    <option>Auto-detect language</option>
+                </select>
+                <i>translate text to selected language (if text language = first)</i>
+            </p>
+            <h2>Additional configuration</h2>
+            <p>
+                <input type="checkbox" id="detection" />
+                <label for="detection">Detection</label>
+                <i>use additional language detection</i>
+            </p>
+            <p>
+                <input type="checkbox" id="lowercase" />
+                <label for="lowercase">Lower Case</label>
+                <i>convert words to lower case before translation</i>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
