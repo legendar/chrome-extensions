@@ -1,7 +1,7 @@
 {
  "name": "Auto-Translate",
- "version": "1.0.1",
- "description": "Automatically translate selection text by goolge translate",
+ "version": "1.1",
+ "description": "Automatically translate selection text by google translate",
  "background_page": "translate.html",
  "options_page": "options.html",
  "permissions": [
@@ -20,6 +20,6 @@
  "content_scripts": [{
     "matches": ["http://*/*", "https://*/*"],
     "js": ["script.js"],
-    "all_frames": "true"
+    "all_frames": true
   }]
 }

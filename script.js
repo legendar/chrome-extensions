@@ -1,6 +1,4 @@
 
-console.log(localStorage);
-
 new function() {
     var o = this;
     
@@ -131,9 +129,15 @@ new function() {
     };
 
     document.body.addEventListener('mouseup', function(e) {
-        if(!(e.ctrlKey && !e.shiftKey && !e.altKey)) {
-            return;
+        var keys = ['Ctrl', 'Alt', 'Shift', 'Meta'];
+        var hotkeys = [];
+        for(var k in keys) {
+            if(e[keys[k].toLowerCase() + 'Key']) {
+                hotkeys.push(keys[k]);
+            }
         }
+        hotkeys.push('Selection');
+        hotkeys = hotkeys.join('+');
 
         o.selection = window.getSelection();
         var text = o.selection.toString();
@@ -143,7 +147,8 @@ new function() {
     
         o.port.postMessage({
             message: 'translate',
-            text: text
+            text: text,
+            hotkeys: hotkeys
         });
 
     }, false);

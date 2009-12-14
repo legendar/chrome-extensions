@@ -11,26 +11,25 @@
         function clone(obj) {
             var ret = {};
             for (p in obj) {
-                ret[p] = (typeof obj[p] == 'object') ? clone(obj[p]) : obj[p];
+                ret[p] = ((typeof obj[p] == 'object') ? clone(obj[p]) : obj[p]);
             }
             return ret;
         }
-        
         var defaults = {
             from: {
                 'type': 'lang',
-                'value': '*',
-                'values': ['*']
+                'value': 'auto',
+                'values': clone(google.language.Languages)
             },
             first: {
                 'type': 'lang',
                 'value': 'ru',
-                'values': ['*']
+                'values': clone(google.language.Languages)
             },
             second: {
                 'type': 'lang',
                 'value': 'en',
-                'values': ['*']
+                'values': clone(google.language.Languages)
             },
             detection: {
                 'type': 'checkbox',
@@ -42,50 +41,47 @@
             }
         };
 
-        if(!localStorage.hotkeys) {
-            localStorage = {
-                hotkeys: {
-                    'Ctrl+Selection': clone(storage.defaults),
-                    'Selection': clone(storage.defaults)
-                },
-                defaults: defaults
+        if(!localStorage.options) {
+            var hotkeys = {
+                'Ctrl+Selection': clone(defaults),
+                'Ctrl+Alt+Selection': clone(defaults)
             };
+            hotkeys['Ctrl+Selection'].from.value = 'en';
+            hotkeys['Ctrl+Alt+Selection'].detection.value = false;
+            hotkeys['Ctrl+Alt+Selection'].lowercase.value = false;
+            localStorage['options'] = JSON.stringify({hotkeys: hotkeys});
+            localStorage['defaults'] = JSON.stringify(defaults);
         }
-        
+
         var ports = [];
-        var options = {
-            from: '*',
-            first: 'ru',
-            second: 'en',
-            langpair: [
-                
-            ],
-            additionalDetection: true,
-            convertToLowerCase: true
-        };
 
         chrome.extension.onConnect.addListener(function(port) {
             ports[port.portId_] = port;
             port.onMessage.addListener(function(m) {
                 switch(m.message) {
                     case 'translate': 
-                        translate(m.text, port.portId_);
+                        var options = JSON.parse(localStorage['options']);
+                        if(options['hotkeys'][m.hotkeys]) {
+                            translate(m.text, port.portId_, options['hotkeys'][m.hotkeys]);
+                        }
                         break;
                     case 'options':
                         port.postMessage({
                             message: 'options',
-                            result: localStorage
+                            options: JSON.parse(localStorage.options)
                         });
                         break;
                 }
             });
         });
 
-        function _translate(text, from, to, callback) {
+        function _translate(text, from, to, options, callback) {
             var url = 'http://translate.google.com/translate_a/t?client=t&otf=1&pc=0';
             url += '&text=' + text;
-            url += '&hl=' + options.first;
-            url += '&sl=' + from;
+            url += '&hl=' + options.first.value;
+            if(from != 'auto') {
+                url += '&sl=' + from;
+            }
             url += '&tl=' + to;
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
@@ -98,22 +94,22 @@
             xhr.send();
         }
 
-        function translate(text, id) {
-            if(options.convertToLowerCase) {
+        function translate(text, id, options) {
+            if(options.lowercase.value) {
                 text = text.toLowerCase();
             }
 
             function translate(text, from) {
-                var to = options.first;
+                var to = options.first.value;
                 if(from == to) {
-                    to = options.second;
+                    to = options.second.value;
                 }
-                _translate(text, from, to, function(result) {
+                _translate(text, from, to, options, function(result) {
                     if (result.sentences.length > 0) {
-                        if(options.additionalDetection && 
+                        if(options.detection.value && 
                            result.sentences[0].trans.toLowerCase() == result.sentences[0].orig.toLowerCase() && 
-                           to != options.second && to == options.first) {
-                            return translate(result.sentences[0].orig, options.first);
+                           to != options.second.value && to == options.first.value) {
+                            return translate(result.sentences[0].orig, options.first.value);
                         }
                         var text = result.sentences[0].trans;
                         var textAdditional = null;
@@ -138,15 +134,15 @@
                 });
             }
             
-            if(options.from == '*') {
+            /*if(options.from == 'auto') {
                 google.language.detect(text, function(result) {
                     if(!result.error && result.language) {
                         translate(text, result.language);
                     }
                 });
-            } else {
-                translate(text, options.from);
-            }
+            } else {*/
+                translate(text, options.from.value);
+            /*}*/
         }
     </script>
 </head>

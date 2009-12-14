@@ -3,16 +3,16 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Options :: Auto-translate plugin for Google Chrome</title>
-    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <!--<script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script>
         //google.load("ext-core", "3.0.0");
         google.load("language", "1");
-    </script>
+    </script>-->
     <script type="text/javascript">
         var defaults;
         var storage = null;
         var lastTab = null;
-        var keys = ['Ctrl', 'Alt', 'Shift', 'Meta']
+        var keys = ['Ctrl', 'Alt', 'Shift', 'Meta'];
 
         function $(id) {
             return document.getElementById(id);
@@ -26,39 +26,68 @@
             return ret;
         }
 
+        function count(obj) {
+            var c = 0;
+            for(var o in obj) {
+                c++;
+            }
+            return c;
+        }
+
+        function error(message) {
+            $('error').firstChild.innerHTML = message;
+            $('error-wrapper').style.display = '';
+            $('error-bg').style.display = '';
+        }
+        
+        function hide() {
+            $('error-wrapper').style.display = 'none';
+            $('error-bg').style.display = 'none';
+        }
+
         function read() {
-            storage = localStorage;
-            defaults = localStorage.defaults;
-            
+            storage = eval('storage = ' + localStorage['options'] + ';');
+            //storage = JSON.parse(localStorage['options']);
+            defaults = JSON.parse(localStorage['defaults']);
+
             var t = null;
-            for(h in storage.hotkeys) {
+            for(var h in storage.hotkeys) {
                 if(t == null) {
                     t = h;
                 }
                 add(h);
             }
 
-            for(id in storage) {
-                if(id == 'hotkeys') {
+            for(var id in storage) {
+                if(id == 'options' || id == 'defaults') {
                     continue;
                 }
                 l(id, storage[id]);
             }
 
             tab(t);
+
+            $('options').style.display = '';
+            $('loading').style.display = 'none';
         }
 
-        function write() {
-            for(id in storage) {
-                if(id == 'hotkeys') {
+        function commit() {
+            for(var id in storage) {
+                if(id == 'hotkeys' || id == 'defaults') {
                     continue;
                 }
                 s(id, storage[id]);
             }
             
-            save(lastTab);
-            
-            localStorage = storage;
+            var lt = save(lastTab);
+            if(!lt) {
+                return;
+            }
+            lastTab = lt;
+
+            localStorage['options'] = JSON.stringify(storage);
+
+            error('<h2>Options saved!</h2>');
         }
 
         function l(id, o) {
@@ -71,9 +100,9 @@
                             langs += '<option value="auto">Auto-detect language</option>';
                             langs += '<option value="-" disabled="disabled">-</option>';
                         }
-                        for(lng in google.language.Languages) {
+                        for(var lng in o.values) {
                             var name = lng.substring(0, 1) + lng.substring(1).toLowerCase().replace('_', ' ');
-                            langs += '<option value="' + google.language.Languages[lng] + '">' + name + '</option>'
+                            langs += '<option value="' + o.values[lng] + '">' + name + '</option>'
                         }
                         $(id).innerHTML = langs;
                     }
@@ -100,11 +129,11 @@
         }
 
         function load(id) {
-            for(i in storage.hotkeys[id]) {
+            for(var i in storage.hotkeys[id]) {
                 l(i, storage.hotkeys[id][i]);
             }
             var hkeys = id.split('+');
-            for(k in hkeys) {
+            for(var k in hkeys) {
                 if(hkeys[k] != 'Selection') {
                     $(hkeys[k]).checked = 'checked';
                 }
@@ -113,7 +142,7 @@
 
         function save(id) {
             var hkeys = [];
-            for(k in keys) {
+            for(var k in keys) {
                 if($(keys[k]).checked) {
                     hkeys.push(keys[k]);
                 }
@@ -123,22 +152,26 @@
             if(id != hkeys) {
                 if(storage.hotkeys[hkeys]) {
                     // error
+                    error('Selected hotkeys<br /><b>(' + hkeys + ')</b><br />are already used!<br />Please select another hotkeys.');
+                    return false;
                 } else {
                     storage.hotkeys[hkeys] = storage.hotkeys[id];
                     delete storage.hotkeys[id];
-                    $(id).innerHTML = hkeys;
+                    $(id).firstChild.nodeValue = hkeys;
                     $(id).id = hkeys;
+                    $('sup-' + id).id = 'sup-' + hkeys;
                     id = hkeys;
                 }
             }
-            for(i in storage.hotkeys[id]) {
+            for(var i in storage.hotkeys[id]) {
                 s(i, storage.hotkeys[id][i]);
             }
             return id;
         }
 
-        function tab(id) {
-            if(lastTab) {
+        function tab(id, skipSave) {
+            skipSave = skipSave || false;
+            if(lastTab && !skipSave) {
                 lt = save(lastTab);
                 if(!lt) {
                     return;
@@ -152,6 +185,14 @@
             load(id);
         }
 
+        function close(id) {
+            $(id).parentNode.removeChild($(id));
+            delete storage.hotkeys[id];
+            if(count(storage.hotkeys) == 1) {
+                $('sup-' + lastTab).style.display = 'none';
+            }
+        }
+
         function add(id) {
             id = id || 'new';
             if(id == 'new' && $(id)) {
@@ -159,17 +200,37 @@
                 if(!lt) {
                     return;
                 }
-                lastTab = lt
+                lastTab = lt;
+            }
+            if(id == 'new' && count(storage.hotkeys) == 1) {
+                $('sup-' + lastTab).style.display = '';
             }
             if(!$(id)) {
                 var span = document.createElement('span');
                 span.id = id;
-                span.innerHTML = id;
+                var display = ((count(storage.hotkeys) == 0) ? ' style="display:none;"' : '');
+                span.innerHTML = id + ' <sup class="close" id="sup-' + id + '"' + display + '>x</sup>';
                 span.className = 'tab';
-                span.onclick = function() {
-                    tab(this.id);
+                span.onclick = function(e) {
+                    if(e.srcElement.tagName == 'SUP') {
+                        if(count(storage.hotkeys) == 1) {
+                            return false;
+                        }
+                        id = e.srcElement.id.substring(4);
+                        if($(id).previousSibling) {
+                            tab($(id).previousSibling.id, true);
+                        } else {
+                            tab($(id).nextSibling.id, true);
+                        }
+                        close(id);
+                    } else {
+                        tab(this.id);
+                    }
                 };
                 $('tabs').insertBefore(span, $('add'));
+                if(id == 'new') {
+                    storage.hotkeys[id] = clone(defaults);
+                }
             }
             tab(id);
         }
@@ -180,21 +241,24 @@
         body {
             text-align: center;
             color: #363636;
+            margin: 0; padding: 0;
         }
         label {
             font-weight: bold;
         }
-        div.loading {
-            background: #CC1111;
+        div#loading {
+            background: #AA2222;
+            margin-top: 2px;
+            font-weight: bold;
             float: right;
             margin-right: 20px;
-            padding: 5px;
+            padding: 2px 5px;
             color: #FAFAFA;
-            display: none;
         }
         div.tab-wrapper {
-            width: 70%;
-            margin: 0 auto;
+            min-width: 70%;
+            display: inline-block;
+            margin: 10px auto 0;
             z-index: 10;
             text-align: left;
         }
@@ -204,7 +268,7 @@
         }
         span.tab {
             z-index: 10;
-            background: #E1E6EE;
+            background: #D1D6DE;
             border: 1px solid #B8CBDE;
             border-bottom: 0;
             -webkit-border-top-left-radius: 10px;
@@ -215,10 +279,19 @@
         }
         span.tab.selected {
             padding-bottom: 4px;
+            background: #E1E6EE;
+        }
+        span.tab:hover {
+            color: #000000;
+            background: #E1E6EE;
         }
         span.add {
             font-weight: bold;
             cursor: pointer;
+            color: #696969;
+        }
+        span.add:hover {
+            color: #000000;
         }
         div.tab-content {
             margin-top: 3px;
@@ -228,10 +301,70 @@
             min-height: 200px;
             z-index: 5;
         }
+        sup.close {
+            font-weight: bold;
+            margin-right: 2px;
+            color: #696969;
+        }
+        sup.close:hover {
+            color: #000000;
+        }
+        div#error-bg {
+            z-index: 50;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            opacity: 0.7;
+            text-align: center;
+        }
+        div#error-wrapper{
+            width: 100%;
+            position: absolute;
+            z-index: 90;
+        }
+        div#error {
+            z-index: 100;
+            margin: 100px auto 0;
+            background: #E1E6EE;
+            border: 1px solid #B8CBDE;
+            -webkit-border-radius: 20px;
+            max-width: 400px;
+            padding: 10px;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+        }
+        div#error: hover {
+            color: #000000;
+        }
+        div#error i {
+            font-size: 12px;
+        }
+        div.save {
+            display: inline-block;
+            clear: both;
+            margin: 10px auto;
+            background: #E1E6EE;
+            border: 1px solid #B8CBDE;
+            -webkit-border-radius: 15px;
+            font-weight: bold;
+            font-size: 24px;
+            padding: 6px;
+            cursor: pointer;
+        }
+        div.save:hover {
+            color: #000000;
+        }
     </style>
 </head>
 <body onload="read()">
-    <div class="loading">Loading...</div>
+  <div id="loading">Loading...</div>
+  <div id="options" style="display:none;">
+    <div id="error-wrapper" style="display:none;">
+        <div id="error" onclick="hide();"><p>error message</p><i>(click to hide)</i></div>
+    </div>
+    <div id="error-bg" style="display:none;"></div>
     <div class="tab-wrapper">
         <div id="tabs" class="tab-list"><span id="add" class="add" onclick="add();">+ (add profile)</span></div>
         <div class="tab-content">
@@ -278,5 +411,8 @@
             </p>
         </div>
     </div>
+    <div></div>
+    <div class="save" onclick="commit();">Save</div>
+  </div>
 </body>
 </html>
