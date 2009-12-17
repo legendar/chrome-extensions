@@ -8,6 +8,15 @@
         google.load("language", "1");
     </script>
     <script type="text/javascript">
+
+        chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+            //console.log(changeInfo);
+            var scheme = tab.url.substring(0, 5);
+            if(scheme == 'https' || scheme == 'http:') {
+                chrome.tabs.executeScript(tabId, {file: 'script.js', allFrames: true});
+            }
+        });
+
         function clone(obj) {
             var ret = {};
             for (p in obj) {

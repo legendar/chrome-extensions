@@ -1,4 +1,6 @@
 
+if(!window['-auto-translate-core-data']) {
+window['-auto-translate-core-data'] = true;
 new function() {
     var o = this;
     
@@ -168,5 +170,4 @@ new function() {
         }
     }, false);
 }
-
-
+}

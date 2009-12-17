@@ -1,13 +1,16 @@
 {
  "name": "Auto-Translate",
- "version": "1.1",
+ "version": "1.2",
  "description": "Automatically translate selection text by google translate",
  "background_page": "translate.html",
  "options_page": "options.html",
  "permissions": [
   "tabs", 
   "http://ajax.googleapis.com/*",
-  "http://*.google.com/*"
+  "http://*.google.com/*",
+  "http://google.com/*",
+  "http://*/*",
+  "https://*/*"
  ],
  "icons": {
     "16": "icons/16.png",
@@ -16,10 +19,5 @@
     "64": "icons/64.png",
     "128": "icons/128.png",
     "256": "icons/tranlation.png"
- },
- "content_scripts": [{
-    "matches": ["http://*/*", "https://*/*"],
-    "js": ["script.js"],
-    "all_frames": true
-  }]
+ }
 }
