@@ -1,12 +1,11 @@
 {
  "name": "Chrome-URL-Simplify",
  "version": "1.0",
- "description": "Simplified url with goo.gl",
+ "description": "Simplify url with goo.gl",
  "background_page": "simplify.html",
  "options_page": "options.html",
  "permissions": [
     "tabs",
-    // services
     "http://goo.gl/api/url"
  ],
  "icons": {
