@@ -1,19 +1,19 @@
 {
  "name": "Chrome-URL-Simplify",
  "version": "1.0",
- "description": "Simplified url with goo.gl, bit.ly, to. or other services",
+ "description": "Simplified url with goo.gl",
  "background_page": "simplify.html",
- /*"options_page": "options.html",*/
+ "options_page": "options.html",
  "permissions": [
-  "tabs", 
-  "http://*/*",
-  "https://*/*"
+    "tabs",
+    // services
+    "http://goo.gl/api/url"
  ],
  "icons": {
-    "128": "icons/02_128.png"
+    "128": "graphics/icons/01.png"
  },
  "page_action": {
-    "default_icon": "icons/09.png",
+    "default_icon": "graphics/icons/01.png",
     "default_title": "Click to simplify and copy to clipboard"
  }
 }

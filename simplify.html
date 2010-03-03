@@ -1,38 +1,70 @@
 <html>
 <head>
 <script type="text/javascript">
-    function a(i){function l(){for(var c=0,a=0;a<arguments.length;a++)c=c+arguments[a]&4294967295;return c}function o(c){c=c=String(c>0?c:c+4294967296);var a;a=c;for(var d=0,j=false,k=a.length-1;k>=0;--k){var f=Number(a.charAt(k));if(j){f*=2;d+=Math.floor(f/10)+f%10}else d+=f;j=!j}a=a=d%10;d=0;if(a!=0){d=10-a;if(c.length%2==1){if(d%2==1)d+=9;d/=2}}a=String(d);a+=c;return a}function p(c){for(var a=5381,d=0;d<c.length;d++)a=l(a<<5,a,c.charCodeAt(d));return a}function q(c){for(var a=0,d=0;d<c.length;d++)a=l(c.charCodeAt(d),a<<6,a<<16,-a);return a}var e="au";e+="th";e+="_";e+="to";e+="k";e+="en";var b=p(i);b=b>>2&1073741823;b=b>>4&67108800|b&63;b=b>>4&4193280|b&1023;b=b>>4&245760|b&16383;var m="7";h=q(i);var g=(b>>2&15)<<4|h&15;g|=(b>>6&15)<<12|(h>>8&15)<<8;g|=(b>>10&15)<<20|(h>>16&15)<<16;g|=(b>>14&15)<<28|(h>>24&15)<<24;m+=o(g);b="user=";b+="toolbar@google.com";b+="&url=";b+=encodeURIComponent(i);b+="&";b+=e;b+="=";b+=m;return b}
-    //function a(e){function k(){for(var b=0,a=0;a<arguments.length;a++)b=b+arguments[a]&4294967295;return b}function m(b){b=b=String(b>0?b:b+4294967296);var a;a=b;for(var c=0,h=false,i=a.length-1;i>=0;--i){var f=Number(a.charAt(i));if(h){f*=2;c+=Math.floor(f/10)+f%10}else c+=f;h=!h}a=a=c%10;c=0;if(a!=0){c=10-a;if(b.length%2==1){if(c%2==1)c+=9;c/=2}}a=String(c);a+=b;return a}function n(b){for(var a=5381,c=0;c<b.length;c++)a=k(a<<5,a,b.charCodeAt(c));return a}function o(b){for(var a=0,c=0;c<b.length;c++)a=k(b.charCodeAt(c),a<<6,a<<16,-a);return a}e={a:e,charCodeAt:function(b){return this.a[b]}};e.length=e.a.length;var d=n(e.a);d=d>>2&1073741823;d=d>>4&67108800|d&63;d=d>>4&4193280|d&1023;d=d>>4&245760|d&16383;var l="7";e=o(e.a);var g=(d>>2&15)<<4|e&15;g|=(d>>6&15)<<12|(e>>8&15)<<8;g|=(d>>10&15)<<20|(e>>16&15)<<16;g|=(d>>14&15)<<28|(e>>24&15)<<24;l+=m(g);return"user=toolbar@google.com&auth_token="+l+"&url="}
+    var services = {};
+    var current = 'goo.gl';
+    var timeout = 3;
+
+    localStorage['iconsCount'] = 7;
+    localStorage['icon'] = parseInt(localStorage['icon'] || 1);
+</script>
+<!-- TODO - added more services and load only one of them -->
+<script type="text/javascript" src="services/goo.gl.js"></script>
+<script type="text/javascript">
+
+
+    function drawIcon(tab, o) {
+        var icon = parseInt(localStorage['icon']);
+        var logo = new Image();
+        logo.src = 'graphics/icons/' + (icon < 10 ? '0' : '') + icon + '.png';
+
+        var cv = document.getElementById('canvas'), cc = cv.getContext('2d');
+
+        cc.globalAlpha = o || 0.7;
+        cc.clearRect(0, 0, cv.width, cv.height);
+        cc.drawImage(logo, 0, 0, cv.width, cv.height);
+
+        chrome.pageAction.setIcon({tabId: tab.id, imageData:cc.getImageData(0, 0, cv.width, cv.height)});
+
+    }
+
+    /*function animateIcon(tab, frame) {
+
+        frame = frame || 0;
+        if(frame == 6) {
+            frame = 0;
+        } //else {
+            setTimeout(function(){animateIcon(tab, frame + 1);}, 90);
+        //}
+
+        var cv = document.getElementById('canvas'),
+            cc = cv.getContext('2d'),
+            l = document.getElementById('logo'),
+            r = document.getElementById('loader');
+
+        //r.style.backgroundPosition = '0 ' + (80 - frame * 16) + 'px';
+
+        cc.save();
+        cc.clearRect(0, 0, cv.width, cv.height);
+        cc.drawImage(l, 0, 0, cv.width, cv.height);
+        cc.drawImage(r, 0, 0 - frame * 16, r.width, r.height);
+        cc.restore();
+
+        //chrome.pageAction.setIcon({tabId: tab.id, imageData:cc.getImageData(0, 0, cv.width, cv.height)});
+        chrome.browserAction.setIcon({tabId: tab.id, imageData:cc.getImageData(0, 0, cv.width, cv.height)});
+
+    }*/
 
     function simplify(url, callback, callbackError) {
         if(!url) return;
         callback = callback || function(){};
-        //callbackError = callbackError || function(){};
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://goo.gl/api/url', true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 201 || xhr.status == 403) {
-                    var result = JSON.parse(xhr.responseText);
-                    if(result['short_url']) {
-                        callback(result['short_url']);
-                    } else {
-                        callbackError(result['error_message']);
-                    }
-                } else {
-                    callbackError('Wrong status (' + xhr.status + ')');
-                }
-            }
-        };
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send(a(url));
-        // timeout 3 sec
-        setTimeout(function(){
-            if(xhr.readyState < 3) {
-                xhr.abort();
-                callbackError('Timeout (3 sec)');
-            }
-        }, 3000);
+        callbackError = callbackError || function(){};
+        services[current]({
+            url: url,
+            callback: callback,
+            callbackError: callbackError,
+            timeout: timeout * 1000 // 3 seconds
+        });
         return url;
     }
 
@@ -42,22 +74,28 @@
         if(scheme == 'http' || scheme == 'ftp:') {
             chrome.pageAction.show(tab.id);
             chrome.pageAction.setTitle({tabId: tab.id, title: 'Click to simplify and copy to clipboard'});
+            drawIcon(tab);
         }
     });
 
     chrome.pageAction.onClicked.addListener(function(tab){
         simplify(tab.url, function(result) {
             chrome.pageAction.setTitle({tabId: tab.id, title: 'URL Simplified (' + result + ')'});
+            drawIcon(tab, 1.0);
             with(document.getElementById('field')) {
                 value = result;
                 focus();
                 select();
             }
+            // copy to clipboard
             document.execCommand('Copy');
+        }, function(result) {
+            chrome.pageAction.setTitle({tabId: tab.id, title: tab.url + '; Error! ' + result});
+            console.log('Can\'t simplify url: ' + tab.url + '. ' + result);
         });
     });
 
 </script>
 </head>
-<body><input type="text" value="xx" id="field" /></body>
+<body><input type="text" value="xx" id="field" /><canvas id="canvas" width="18" height="18"></canvas></body>
 </html>
