@@ -1,0 +1,18 @@
+<html>
+<head>
+<script type="text/javascript">
+    function updateTab(tab) {
+        if(tab.url.substring(0, 4) == 'http') {
+            var script = "window['-chrome-autofill-enhancer-data'] = " + (localStorage.autofills || '{}')  + ";";
+            chrome.tabs.executeScript(tab.id,  {code: script, allFrames: true}, function() {
+                chrome.tabs.executeScript(tab.id, {file: 'enhancer.js', allFrames: true});
+            });
+        }
+    }
+    chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+        updateTab(tab);
+    });
+</script>
+</head>
+<body></body>
+</html>

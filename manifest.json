@@ -1,0 +1,12 @@
+{
+ "name": "Chrome-Autofill-Enhancer",
+ "version": "1.0",
+ "description": "Enhancer you autofill. Allow to simply insert your own data into any fields.",
+ "background_page": "enhancer.html",
+ "options_page": "options.html",
+ "permissions": [
+    "tabs",
+    "http://*/*",
+    "https://*/*"
+ ]
+}
