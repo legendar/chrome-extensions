@@ -25,7 +25,12 @@ new function() {
         var i, mx = 0, m, sub, subs = [], p = 2;
         for(i in el[o.id]['array']) {
             sub = document.createElement('div');
-            sub.innerHTML = '<b style="border-right: 1px solid #363636; display: inline-block; text-align: right; padding-right: ' + p + 'px; margin-right: 2px;">' + el[o.id]['array'][i] + '</b>' + el[o.id]['data'][el[o.id]['array'][i]];
+            sub.innerHTML = '<b style="border-right: 1px solid #363636; display: inline-block; text-align: right; padding-right: ' + p + 'px; margin-right: 2px;">' + el[o.id]['array'][i] + '</b>';
+            if(el.tagName == 'INPUT' && el.getAttribute('type') == 'password') {
+                sub.innerHTML += '**************************';
+            } else {
+                sub.innerHTML += el[o.id]['data'][el[o.id]['array'][i]];
+            }
             sub.setAttribute('style', 'text-overflow: ellipsis; overflow: hidden; white-space: nowrap;');
             sub.setAttribute('num', i);
             sub.setAttribute('index', el[o.id]['array'][i]);
@@ -46,6 +51,11 @@ new function() {
         }
         div.style.left = (el.getBoundingClientRect().left + document.body.scrollLeft - document.body.clientLeft - mx - p) + 'px';
         div.style.width = (el.offsetWidth-2 + mx + p) + 'px',
+
+        div.el = el;
+        div.addEventListener('mouseout', function(e){
+            o.move(this.el, -1);
+        });
 
         el[o.id]['div'] = div;
         el[o.id]['key'] = -1;
@@ -71,8 +81,11 @@ new function() {
     };
 
     // find all fields
-    var i, els = document.querySelectorAll('input[type="text"], textarea'), l = els.length;
+    var i, els = document.querySelectorAll('input, textarea'), l = els.length;
     for(i=0; i<l; i++) {
+        if(els[i].tagName == 'INPUT' && els[i].hasAttribute('type') && !(els[i].getAttribute('type') == 'text' || els[i].getAttribute('type') == 'password')) {
+            continue;
+        }
         els[i][o.id] = {active: false};
         els[i].addEventListener('keydown', function(e){
             if(!this[o.id].active && e.ctrlKey && e.keyCode == 32) {
