@@ -13,7 +13,7 @@ new function() {
         div.setAttribute('style', [
             'position: absolute',
             'left: ' + (el.getBoundingClientRect().left + document.body.scrollLeft - document.body.clientLeft) + 'px',
-            'top: ' + (el.getBoundingClientRect().top + document.body.scrollTop - document.body.clientTop + el.offsetHeight + 1) + 'px',
+            'top: ' + (el.getBoundingClientRect().top + document.body.scrollTop - document.body.clientTop + el.offsetHeight) + 'px',
             'z-index: 9999',
             'width: ' + (el.offsetWidth-2) + 'px',
             'background: #ffffff',
@@ -21,9 +21,11 @@ new function() {
             'border: 1px solid #363636',
             '-webkit-box-shadow: #363636 2px 2px 3px'
         ].join(';'));
-        for(var i in el[o.id]['array']) {
-            var sub = document.createElement('div');
-            sub.innerHTML = '<b>' + el[o.id]['array'][i] + '</b>: ' + el[o.id]['data'][el[o.id]['array'][i]];
+        document.body.appendChild(div);
+        var i, mx = 0, m, sub, subs = [], p = 2;
+        for(i in el[o.id]['array']) {
+            sub = document.createElement('div');
+            sub.innerHTML = '<b style="border-right: 1px solid #363636; display: inline-block; text-align: right; padding-right: ' + p + 'px; margin-right: 2px;">' + el[o.id]['array'][i] + '</b>' + el[o.id]['data'][el[o.id]['array'][i]];
             sub.setAttribute('style', 'text-overflow: ellipsis; overflow: hidden; white-space: nowrap;');
             sub.setAttribute('num', i);
             sub.setAttribute('index', el[o.id]['array'][i]);
@@ -35,8 +37,16 @@ new function() {
                 o.hide(this.el);
             });
             div.appendChild(sub);
+            m = sub.getElementsByTagName('b')[0].offsetWidth;
+            if(m > mx) mx = m;
+            subs.push(sub);
         }
-        document.body.appendChild(div);
+        for(i in subs) {
+            subs[i].getElementsByTagName('b')[0].style.width = mx + 'px';
+        }
+        div.style.left = (el.getBoundingClientRect().left + document.body.scrollLeft - document.body.clientLeft - mx - p) + 'px';
+        div.style.width = (el.offsetWidth-2 + mx + p) + 'px',
+
         el[o.id]['div'] = div;
         el[o.id]['key'] = -1;
         el[o.id]['active'] = true;
