@@ -46,6 +46,12 @@ new function() {
                     }
                     
                     function getOffsets(el) {
+                        var b = el.getBoundingClientRect(), doc = document.documentElement;
+                        return {
+                            'top':  b.top + doc.scrollTop - doc.clientTop,
+                            'left': b.left + doc.scrollTop - doc.clientLeft
+                        };
+
                         var l = t = 0;
                         do {
                             l += el.offsetLeft || 0;
@@ -68,7 +74,7 @@ new function() {
                     }
                     d.style.left = offsets.left + 'px';
                 })(d);
-                window.getSelection().empty();
+                //window.getSelection().empty();
                 break;
         }
     });
