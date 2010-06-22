@@ -44,12 +44,12 @@ new function() {
                         d.style.left = '0';*/
                         return;
                     }
-                    
+
                     function getOffsets(el) {
                         var b = el.getBoundingClientRect(), doc = document.documentElement;
                         return {
-                            'top':  b.top + doc.scrollTop - doc.clientTop,
-                            'left': b.left + doc.scrollTop - doc.clientLeft
+                            'top':  b.top + (window.pageYOffset || doc.scrollTop) - doc.clientTop,
+                            'left': b.left + (window.pageXOffset || doc.scrollLeft) - doc.clientLeft
                         };
 
                         var l = t = 0;
@@ -60,14 +60,14 @@ new function() {
                         } while (el);
                         return {'top': t, 'left': l};
                     }
-                    
+
                     var tmpNode = document.createElement('span');
                     selection.getRangeAt(0).insertNode(tmpNode);
                     offsets = getOffsets(tmpNode);
                     tmpNode.parentNode.removeChild(tmpNode);
                     delete tmpNode;
-                    
-                    if(offsets.top - document.body.scrollTop >= d.offsetHeight) {
+
+                    if(offsets.top - document.documentElement.scrollTop >= d.offsetHeight) {
                         d.style.top = (offsets.top - d.offsetHeight - offset) + 'px';
                     } else {
                         d.style.top = (offsets.top + 20 + offset) + 'px';
