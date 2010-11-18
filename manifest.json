@@ -1,0 +1,18 @@
+{
+ "name": "Chrome-URL-Simplify",
+ "version": "1.0",
+ "description": "Simplify url with goo.gl",
+ "background_page": "simplify.html",
+ "options_page": "options.html",
+ "permissions": [
+    "tabs",
+    "http://goo.gl/api/url"
+ ],
+ "icons": {
+    "128": "graphics/icons/01.png"
+ },
+ "page_action": {
+    "default_icon": "graphics/icons/01.png",
+    "default_title": "Click to simplify and copy to clipboard"
+ }
+}
