@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Options :: Url-simplify plugin for Google Chrome</title>
+    <script type="text/javascript">
+
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        function load() {
+            var autofills = localStorage.autofills ? JSON.parse(localStorage.autofills) : {};
+            for(var x in autofills) {
+                add(x, autofills[x]);
+            }
+        }
+
+        function add(name, value) {
+            var a = document.createElement('DIV');
+            a.className = 'autofill';
+            a.innerHTML = 'Name: <input type="text" value="' + (name || '') + '" /><br />Value:<textarea>' + (value || '') + '</textarea><br /><button onclick="this.parentNode.parentNode.removeChild(this.parentNode);">Delete</button>';
+            $('autofillsWrapper').appendChild(a);
+        }
+
+        function save() {
+            var inputs = document.querySelectorAll('input[type="text"]');
+            var textareas = document.querySelectorAll('textarea');
+            var autofills = {};
+            for(var i in inputs) {
+                if(inputs[i].value == "") continue;
+                autofills[inputs[i].value] = textareas[i].value;
+            }
+            console.log(autofills);
+            localStorage.autofills = JSON.stringify(autofills);
+            alert('Saved');
+        }
+
+    </script>
+    <style type="text/css">
+        html, body { height: 100%; }
+        body {
+            text-align: center;
+            color: #363636;
+            margin: 0; padding: 0;
+        }
+        div#autofillsWrapper {
+            text-align: left;
+        }
+        div.autofill {
+            display: inline-block;
+            padding: 5px;
+            margin: 5px;
+            -webkit-box-shadow: #363636 2px 2px 3px;
+            border: 1px solid #363636;
+        }
+    </style>
+</head>
+<body onload="load()">
+  <div id="options">
+    <h2>Your own autofills:</h2>
+    <button onclick="add();">add</button>
+    <button onclick="save();">save</button>
+    <div id="autofillsWrapper"></div>
+  </div>
+</body>
+</html>
