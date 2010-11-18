@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Auto translate plugin for Google Chrome</title>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load("language", "1");
+    </script>
+    <script type="text/javascript">
+
+        function clone(obj) {
+            var ret = {};
+            for (p in obj) {
+                ret[p] = ((typeof obj[p] == 'object') ? clone(obj[p]) : obj[p]);
+            }
+            return ret;
+        }
+
+        var defaults = {
+            from: {
+                'type': 'lang',
+                'value': 'auto',
+                'values': clone(google.language.Languages)
+            },
+            first: {
+                'type': 'lang',
+                'value': 'ru',
+                'values': clone(google.language.Languages)
+            },
+            second: {
+                'type': 'lang',
+                'value': 'en',
+                'values': clone(google.language.Languages)
+            },
+            detection: {
+                'type': 'checkbox',
+                'value': true,
+            },
+            lowercase: {
+                'type': 'checkbox',
+                'value': true,
+            }
+        };
+
+        //if(!localStorage.defaults) {
+            localStorage['defaults'] = JSON.stringify(defaults);
+        //}
+
+        var branding = '<img src="http://www.google.com/uds/css/small-logo.png" onclick="document.location.href=\\\'http://translate.google.com/\\\';" style="position: absolute !important; z-index: -1 !important; right: 1px !important; top: -20px !important; cursor: pointer !important;-webkit-border-radius: 20px; background-color: rgba(200, 200, 200, 0.3) !important; padding: 3px 5px 0 !important; margin: 0 !important;" />';
+
+        var themes = {
+            'black': '<div style="' +
+                        'max-width: 300px !important;' +
+                        'color: #fafafa !important;' +
+                        'opacity: 0.8 !important;' +
+                        'border-color: #000000 !important;' +
+                        'border-width: 0px !important;' +
+                        '-webkit-border-radius: 10px !important;' +
+                        'background-color: #363636 !important;' +
+                        'font-size: 16px !important;' +
+                        'padding: 8px !important;' +
+                        'overflow: visible !important;' +
+                        'background-image: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #000), color-stop(50%, #363636), color-stop(100%, #000));' +
+                        'z-index: 999999 !important;' +
+                        'text-align: left  !important;' +
+                      '"><div class="translate"></div><div class="additional"></div></div>',
+            'white': '',
+            'customize': '',
+        }
+        
+        //if(!localStorage.themes) {
+            localStorage['themes'] = JSON.stringify(themes);
+        //}
+
+        themes = JSON.parse(localStorage['themes']);
+        
+        var options = {};
+        if(localStorage.options) {
+            options = JSON.parse(localStorage.options);
+        }
+
+        if(!options.hotkeys) {
+            options.hotkeys = {
+                'Ctrl+Selection': clone(defaults),
+                'Ctrl+Alt+Selection': clone(defaults),
+                'Ctrl+Shift+Selection': clone(defaults)
+            };
+            options.hotkeys['Ctrl+Selection'].from.value = 'en';
+            options.hotkeys['Ctrl+Shift+Selection'].from.value = 'latest';
+            options.hotkeys['Ctrl+Shift+Selection'].detection.value = false;
+            options.hotkeys['Ctrl+Alt+Selection'].detection.value = false;
+            options.hotkeys['Ctrl+Alt+Selection'].lowercase.value = false;
+        }
+        
+        localStorage['options'] = JSON.stringify(options);
+        
+        chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+            var scheme = tab.url.substring(0, 5);
+            if(scheme == 'https' || scheme == 'http:') {
+                var theme = "window['-chrome-auto-translate-core-data-theme'] = '" + themes['black'] + branding + "';";
+                chrome.tabs.executeScript(tabId, {code: theme, allFrames: true}, function() {
+                    chrome.tabs.executeScript(tabId, {file: 'script.js', allFrames: true});
+                });
+            }
+        });
+
+        var latest = 'auto';
+
+        chrome.extension.onConnect.addListener(function(port) {
+            port.onMessage.addListener(function(m) {
+                switch(m.message) {
+                    case 'translate': 
+                        var options = JSON.parse(localStorage['options']);
+                        if(options['hotkeys'][m.hotkeys]) {
+                            translate(m.text, port, options['hotkeys'][m.hotkeys]);
+                        }
+                        break;
+                    case 'options':
+                        port.postMessage({
+                            message: 'options',
+                            options: JSON.parse(localStorage.options)
+                        });
+                        break;
+                }
+            });
+        });
+
+        function _translate(text, from, to, options, callback) {
+            var url = 'http://translate.google.com/translate_a/t?client=t&otf=1&pc=0';
+            url += '&text=' + text;
+            url += '&hl=' + options.first.value;
+            if(from != 'auto') {
+                url += '&sl=' + from;
+            }
+            url += '&tl=' + to;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    // JSON.parse does not evaluate the attacker's scripts.
+                    callback(JSON.parse(xhr.responseText), text);
+                }
+            }
+            xhr.send();
+        }
+
+        function translate(text, port, options) {
+            console.log(text);
+            if(options.lowercase.value) {
+                text = text.toLowerCase();
+            }
+
+            function translate(text, from) {
+                var to = options.first.value;
+                if(from == to) {
+                    to = options.second.value;
+                }
+                _translate(text, from, to, options, function(result, text) {
+                    if (result.sentences.length > 0) {
+                        if(options.detection.value && 
+                           result.sentences[0].trans.toLowerCase() == result.sentences[0].orig.toLowerCase() && 
+                           to != options.second.value && to == options.first.value) {
+                            return translate(text, options.first.value);
+                        }
+                        latest = result.src;
+                        var text = '';
+                        for(i in result.sentences) {
+                            if(text.length != 0) {
+                                text += ' ';
+                            }
+                            text += result.sentences[i].trans;
+                        }
+                        var textAdditional = null;
+                        if(result.dict && result.dict.length > 0) {
+                            if(text.length != 0) {
+                                text += '<br />';
+                            }
+                            textAdditional = '';
+                            for(dict in result.dict) {
+                                if(result.dict[dict].pos.length > 0) {
+                                    textAdditional += '<b>' + result.dict[dict].pos + '</b> ';
+                                }
+                                textAdditional += '<i>' + result.dict[dict].terms.join(', ') + '</i><br />';
+                            }
+                        }
+                        port.postMessage({
+                            message: 'result',
+                            result: {
+                                text: text,
+                                textAdditional: textAdditional
+                            }
+                        });
+                    }
+                });
+            }
+            
+            translate(text, ((options.from.value == 'latest') ? latest : options.from.value));
+        }
+    </script>
+</head>
+<body></body>
+</html>

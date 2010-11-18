@@ -1,0 +1,15 @@
+1.3 (2009-12-17)
+    - added 'latest' language in options
+    - fixed bug with frames
+    - speed up scripts
+    - some code optimizations
+    - starting implementation themes
+    - more any bugs fixed
+1.2 (2009-12-17)
+    - same code optimizations
+    - extension now working on chrome extensions gallery page
+1.1 (2009-12-14)
+    - added options page
+    - fixed same bugs
+1.0 (2009-12-01)
+    - extension released
