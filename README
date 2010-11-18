@@ -1,0 +1,7 @@
+This repository containts following crhome extesions:
+
+    - Auto traslate
+    - Auto-fill enhancer
+    - Url simplify
+
+Every extensions has own branch. So run 'git branch' to list the bracnhes and 'git checkout brancname' for get source-code for every extension
