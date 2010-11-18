@@ -6,4 +6,4 @@ This repository containts following crhome extesions:
 
 Every extensions has own branch. So run 'git branch' to list the bracnhes and 'git checkout brancname' for get source-code for every extension
 
-All code under this repositury is licensed with GPLv3 license
+All code under this repository is licensed with GPLv3 license
