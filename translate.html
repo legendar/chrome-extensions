@@ -25,7 +25,7 @@
             },
             first: {
                 'type': 'lang',
-                'value': 'ru',
+                'value': navigator.language,
                 'values': clone(google.language.Languages)
             },
             second: {
@@ -127,7 +127,8 @@
         });
 
         function _translate(text, from, to, options, callback) {
-            var url = 'http://translate.google.com/translate_a/t?client=t&otf=1&pc=0';
+            //var url = 'http://translate.google.com/translate_a/t?client=t&otf=1&pc=0';
+            var url = 'http://translate.google.com/translate_a/t?client=f&otf=1&pc=0';
             url += '&text=' + text;
             url += '&hl=' + options.first.value;
             if(from != 'auto') {
@@ -146,7 +147,6 @@
         }
 
         function translate(text, port, options) {
-            console.log(text);
             if(options.lowercase.value) {
                 text = text.toLowerCase();
             }
