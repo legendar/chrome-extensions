@@ -10,7 +10,8 @@ new function() {
         el._autocomplete = el.getAttribute('autocomplete');
         el.setAttribute('autocomplete', 'off');
         var div = document.createElement('div');
-        div.setAttribute('style', [
+        //var css = document.defaultView.getComputedStyle(el, null).cssText;
+        div.setAttribute('style', /*css + */([
             'position: absolute',
             'left: ' + (el.getBoundingClientRect().left + document.body.scrollLeft - document.body.clientLeft) + 'px',
             'top: ' + (el.getBoundingClientRect().top + document.body.scrollTop - document.body.clientTop + el.offsetHeight) + 'px',
@@ -20,14 +21,14 @@ new function() {
             'color: #363636',
             'border: 1px solid #363636',
             '-webkit-box-shadow: #363636 2px 2px 3px'
-        ].join(';'));
+        ].join(';')));
         document.body.appendChild(div);
         var i, mx = 0, m, sub, subs = [], p = 2;
         for(i in el[o.id]['array']) {
             sub = document.createElement('div');
-            sub.innerHTML = '<b style="border-right: 1px solid #363636; display: inline-block; text-align: right; padding-right: ' + p + 'px; margin-right: 2px;">' + el[o.id]['array'][i] + '</b>';
+            sub.innerHTML = '<b style="background: #FFF8DD; border-right: 1px solid #363636; display: inline-block; text-align: right; padding-right: ' + p + 'px; margin-right: 2px;">' + el[o.id]['array'][i] + '</b>';
             if(el.tagName == 'INPUT' && el.getAttribute('type') == 'password') {
-                sub.innerHTML += '**************************';
+                sub.innerHTML += '**************';
             } else {
                 sub.innerHTML += el[o.id]['data'][el[o.id]['array'][i]];
             }
@@ -49,8 +50,8 @@ new function() {
         for(i in subs) {
             subs[i].getElementsByTagName('b')[0].style.width = mx + 'px';
         }
-        div.style.left = (el.getBoundingClientRect().left + document.body.scrollLeft - document.body.clientLeft - mx - p) + 'px';
-        div.style.width = (el.offsetWidth-2 + mx + p) + 'px',
+        div.style.left = (el.getBoundingClientRect().left + document.body.scrollLeft - document.body.clientLeft - mx - p - 1) + 'px';
+        div.style.width = (el.offsetWidth-2 + mx + p + 1) + 'px',
 
         div.el = el;
         div.addEventListener('mouseout', function(e){
