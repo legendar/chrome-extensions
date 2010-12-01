@@ -65,7 +65,20 @@
                         'z-index: 999999 !important;' +
                         'text-align: left  !important;' +
                       '"><div class="translate"></div><div class="additional"></div></div>',
-            'white': '',
+            'white': '<div style="' +
+                        'max-width: 300px !important;' +
+                        'color: #121212 !important;' +
+                        'opacity: 1 !important;' +
+                        'border: 1px solid #363636 !important;' +
+                        '-webkit-border-radius: 10px !important;' +
+                        'background-color: #FFFFFF !important;' +
+                        'font-size: 16px !important;' +
+                        'padding: 8px !important;' +
+                        'overflow: visible !important;' +
+                        'background-image: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #FFF), color-stop(50%, #EEE), color-stop(100%, #FFF));' +
+                        'z-index: 999999 !important;' +
+                        'text-align: left  !important;' +
+                      '"><div class="translate"></div><div class="additional"></div></div>',
             'customize': '',
         }
         
@@ -92,13 +105,42 @@
             options.hotkeys['Ctrl+Alt+Selection'].detection.value = false;
             options.hotkeys['Ctrl+Alt+Selection'].lowercase.value = false;
         }
+
+        if(!options.theme) {
+            options.theme = 'black';
+        }
         
         localStorage['options'] = JSON.stringify(options);
         
         chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+
+            var options = {};
+            if(localStorage.options) {
+                options = JSON.parse(localStorage.options);
+            }
+
+            if(!options.hotkeys) {
+                options.hotkeys = {
+                    'Ctrl+Selection': clone(defaults),
+                    'Ctrl+Alt+Selection': clone(defaults),
+                    'Ctrl+Shift+Selection': clone(defaults)
+                };
+                options.hotkeys['Ctrl+Selection'].from.value = 'en';
+                options.hotkeys['Ctrl+Shift+Selection'].from.value = 'latest';
+                options.hotkeys['Ctrl+Shift+Selection'].detection.value = false;
+                options.hotkeys['Ctrl+Alt+Selection'].detection.value = false;
+                options.hotkeys['Ctrl+Alt+Selection'].lowercase.value = false;
+            }
+
+            if(!options.theme) {
+                options.theme = 'black';
+            }
+
+            localStorage['options'] = JSON.stringify(options);
+
             var scheme = tab.url.substring(0, 5);
             if(scheme == 'https' || scheme == 'http:') {
-                var theme = "window['-chrome-auto-translate-core-data-theme'] = '" + themes['black'] + branding + "';";
+                var theme = "window['-chrome-auto-translate-core-data-theme'] = '" + themes[options.theme] + branding + "';";
                 chrome.tabs.executeScript(tabId, {code: theme, allFrames: true}, function() {
                     chrome.tabs.executeScript(tabId, {file: 'script.js', allFrames: true});
                 });
