@@ -4,6 +4,6 @@ This repository containts following crhome extesions:
     - Auto-fill enhancer
     - Url simplify
 
-Every extensions has own branch. So run 'git branch' to list the bracnhes and 'git checkout brancname' for get source-code for every extension
+Every extensions has own branch. So run 'git branch' to list the branches and 'git checkout branchname' for get source-code for every extension
 
 All code under this repository is licensed with GPLv3 license
