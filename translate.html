@@ -3,52 +3,150 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Auto translate plugin for Google Chrome</title>
-    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">
-        google.load("language", "1");
-    </script>
-    <script type="text/javascript">
-
-        function clone(obj) {
-            var ret = {};
-            for (p in obj) {
-                ret[p] = ((typeof obj[p] == 'object') ? clone(obj[p]) : obj[p]);
-            }
-            return ret;
+        var languages = {
+            AFRIKAANS: "af",
+            ALBANIAN: "sq",
+            AMHARIC: "am",
+            ARABIC: "ar",
+            ARMENIAN: "hy",
+            AZERBAIJANI: "az",
+            BASQUE: "eu",
+            BELARUSIAN: "be",
+            BENGALI: "bn",
+            BIHARI: "bh",
+            BRETON: "br",
+            BULGARIAN: "bg",
+            BURMESE: "my",
+            CATALAN: "ca",
+            CHEROKEE: "chr",
+            CHINESE: "zh",
+            CHINESE_SIMPLIFIED: "zh-CN",
+            CHINESE_TRADITIONAL: "zh-TW",
+            CORSICAN: "co",
+            CROATIAN: "hr",
+            CZECH: "cs",
+            DANISH: "da",
+            DHIVEHI: "dv",
+            DUTCH: "nl",
+            ENGLISH: "en",
+            ESPERANTO: "eo",
+            ESTONIAN: "et",
+            FAROESE: "fo",
+            FILIPINO: "tl",
+            FINNISH: "fi",
+            FRENCH: "fr",
+            FRISIAN: "fy",
+            GALICIAN: "gl",
+            GEORGIAN: "ka",
+            GERMAN: "de",
+            GREEK: "el",
+            GUJARATI: "gu",
+            HAITIAN_CREOLE: "ht",
+            HEBREW: "iw",
+            HINDI: "hi",
+            HUNGARIAN: "hu",
+            ICELANDIC: "is",
+            INDONESIAN: "id",
+            INUKTITUT: "iu",
+            IRISH: "ga",
+            ITALIAN: "it",
+            JAPANESE: "ja",
+            JAVANESE: "jw",
+            KANNADA: "kn",
+            KAZAKH: "kk",
+            KHMER: "km",
+            KOREAN: "ko",
+            KURDISH: "ku",
+            KYRGYZ: "ky",
+            LAO: "lo",
+            LAOTHIAN: "lo",
+            LATIN: "la",
+            LATVIAN: "lv",
+            LITHUANIAN: "lt",
+            LUXEMBOURGISH: "lb",
+            MACEDONIAN: "mk",
+            MALAY: "ms",
+            MALAYALAM: "ml",
+            MALTESE: "mt",
+            MAORI: "mi",
+            MARATHI: "mr",
+            MONGOLIAN: "mn",
+            NEPALI: "ne",
+            NORWEGIAN: "no",
+            OCCITAN: "oc",
+            ORIYA: "or",
+            PASHTO: "ps",
+            PERSIAN: "fa",
+            POLISH: "pl",
+            PORTUGUESE: "pt",
+            PORTUGUESE_PORTUGAL: "pt-PT",
+            PUNJABI: "pa",
+            QUECHUA: "qu",
+            ROMANIAN: "ro",
+            RUSSIAN: "ru",
+            SANSKRIT: "sa",
+            SCOTS_GAELIC: "gd",
+            SERBIAN: "sr",
+            SINDHI: "sd",
+            SINHALESE: "si",
+            SLOVAK: "sk",
+            SLOVENIAN: "sl",
+            SPANISH: "es",
+            SUNDANESE: "su",
+            SWAHILI: "sw",
+            SWEDISH: "sv",
+            SYRIAC: "syr",
+            TAGALOG: "tl",
+            TAJIK: "tg",
+            TAMIL: "ta",
+            TATAR: "tt",
+            TELUGU: "te",
+            THAI: "th",
+            TIBETAN: "bo",
+            TONGA: "to",
+            TURKISH: "tr",
+            UIGHUR: "ug",
+            UKRAINIAN: "uk",
+            //UNKNOWN: "",
+            URDU: "ur",
+            UZBEK: "uz",
+            VIETNAMESE: "vi",
+            WELSH: "cy",
+            YIDDISH: "yi",
+            YORUBA: "yo"
         }
+        localStorage['languages'] || (localStorage['languages'] = JSON.stringify(languages));
 
         var defaults = {
-            from: {
-                'type': 'lang',
-                'value': 'auto',
-                'values': clone(google.language.Languages)
-            },
-            first: {
-                'type': 'lang',
-                'value': navigator.language,
-                'values': clone(google.language.Languages)
-            },
-            second: {
-                'type': 'lang',
-                'value': 'en',
-                'values': clone(google.language.Languages)
-            },
-            detection: {
-                'type': 'checkbox',
-                'value': true,
-            },
-            lowercase: {
-                'type': 'checkbox',
-                'value': true,
-            }
+            from: 'auto',
+            first: navigator.language,
+            second: 'en',
+            ctrl: true,
+            alt: false,
+            meta: false,
+            shift: false,
+            selection: true,
+            mouseover: false,
+            theme: 'black',
+            service: 'google'
         };
+        localStorage['defaults'] = JSON.stringify(defaults);
 
-        //if(!localStorage.defaults) {
-            localStorage['defaults'] = JSON.stringify(defaults);
-        //}
+        if(!localStorage['options']) {
+            // set defaults
+            localStorage['options'] = JSON.stringify([defaults]);
+        }
+
+        var options = JSON.parse(localStorage['options']);
+        if(!(options instanceof Array)) {
+            // TODO convert old options to new format
+            options = [defaults];
+            localStorage['options'] = JSON.stringify(options);
+        }
 
         var branding = '<img src="http://www.google.com/uds/css/small-logo.png" onclick="document.location.href=\\\'http://translate.google.com/\\\';" style="position: absolute !important; z-index: -1 !important; right: 1px !important; top: -20px !important; cursor: pointer !important;-webkit-border-radius: 20px; background-color: rgba(200, 200, 200, 0.3) !important; padding: 3px 5px 0 !important; margin: 0 !important;" />';
-
+        var brandingS = '<img src="https://www.google.com/uds/css/small-logo.png" onclick="document.location.href=\\\'http://translate.google.com/\\\';" style="position: absolute !important; z-index: -1 !important; right: 1px !important; top: -20px !important; cursor: pointer !important;-webkit-border-radius: 20px; background-color: rgba(200, 200, 200, 0.3) !important; padding: 3px 5px 0 !important; margin: 0 !important;" />';
         var themes = {
             'black': '<div style="' +
                         'max-width: 300px !important;' +
@@ -80,93 +178,63 @@
                         'text-align: left  !important;' +
                       '"><div class="translate"></div><div class="additional"></div></div>',
             'customize': '',
-        }
-        
-        //if(!localStorage.themes) {
-            localStorage['themes'] = JSON.stringify(themes);
-        //}
+        };
 
-        themes = JSON.parse(localStorage['themes']);
-        
-        var options = {};
-        if(localStorage.options) {
-            options = JSON.parse(localStorage.options);
-        }
+        // TODO
+        //localStorage['themes'] = JSON.stringify(themes);
+        //themes = JSON.parse(localStorage['themes']);
 
-        if(!options.hotkeys) {
-            options.hotkeys = {
-                'Ctrl+Selection': clone(defaults),
-                'Ctrl+Alt+Selection': clone(defaults),
-                'Ctrl+Shift+Selection': clone(defaults)
-            };
-            options.hotkeys['Ctrl+Selection'].from.value = 'en';
-            options.hotkeys['Ctrl+Shift+Selection'].from.value = 'latest';
-            options.hotkeys['Ctrl+Shift+Selection'].detection.value = false;
-            options.hotkeys['Ctrl+Alt+Selection'].detection.value = false;
-            options.hotkeys['Ctrl+Alt+Selection'].lowercase.value = false;
-        }
-
-        if(!options.theme) {
+        /*if(!options.theme) {
             options.theme = 'black';
+        }*/
+
+        var holds = [];
+        var keys = ['Ctrl', 'Alt', 'Shift', 'Meta'];
+        function load() {
+            options = JSON.parse(localStorage['options']);
+            hotkeys = [];
+            options.forEach(function(o){
+                var h = [];
+                keys.forEach(function(k){
+                    o[k] && h.push(k);
+                });
+                o.selection && holds.push(h.join('+') + '+Selection');
+                o.mouseover && holds.push(h.join('+') + '+Mouseover');
+            });
         }
-        
-        localStorage['options'] = JSON.stringify(options);
-        
+        load();
+
         chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-
-            var options = {};
-            if(localStorage.options) {
-                options = JSON.parse(localStorage.options);
-            }
-
-            if(!options.hotkeys) {
-                options.hotkeys = {
-                    'Ctrl+Selection': clone(defaults),
-                    'Ctrl+Alt+Selection': clone(defaults),
-                    'Ctrl+Shift+Selection': clone(defaults)
-                };
-                options.hotkeys['Ctrl+Selection'].from.value = 'en';
-                options.hotkeys['Ctrl+Shift+Selection'].from.value = 'latest';
-                options.hotkeys['Ctrl+Shift+Selection'].detection.value = false;
-                options.hotkeys['Ctrl+Alt+Selection'].detection.value = false;
-                options.hotkeys['Ctrl+Alt+Selection'].lowercase.value = false;
-            }
-
-            if(!options.theme) {
-                options.theme = 'black';
-            }
-
-            localStorage['options'] = JSON.stringify(options);
 
             var scheme = tab.url.substring(0, 5);
             if(scheme == 'https' || scheme == 'http:') {
-                var theme = "window['-chrome-auto-translate-core-data-theme'] = '" + themes[options.theme] + branding + "';";
+                //var theme = "window['-chrome-auto-translate-core-data-theme'] = '" + themes[options.theme] + (scheme == 'https' ? brandingS : branding) + "';";
+                var theme = '';
                 chrome.tabs.executeScript(tabId, {code: theme, allFrames: true}, function() {
-                    chrome.tabs.executeScript(tabId, {file: 'script.js', allFrames: true});
+                    chrome.tabs.executeScript(tabId, {code: 'var holds = ' + JSON.stringify(holds), allFrames: true}, function() {
+                        chrome.tabs.executeScript(tabId, {file: 'inject.js', allFrames: true});
+                    });
                 });
             }
         });
 
-        var latest = 'auto';
-
         chrome.extension.onConnect.addListener(function(port) {
             port.onMessage.addListener(function(m) {
                 switch(m.message) {
-                    case 'translate': 
+                    case 'translate':
                         var options = JSON.parse(localStorage['options']);
                         if(options['hotkeys'][m.hotkeys]) {
                             translate(m.text, port, options['hotkeys'][m.hotkeys]);
                         }
                         break;
                     case 'options':
-                        port.postMessage({
-                            message: 'options',
-                            options: JSON.parse(localStorage.options)
-                        });
+                        load();
                         break;
                 }
             });
         });
+
+        var latest = 'auto';
 
         function _translate(text, from, to, options, callback) {
             //var url = 'http://translate.google.com/translate_a/t?client=t&otf=1&pc=0';
@@ -189,9 +257,6 @@
         }
 
         function translate(text, port, options) {
-            if(options.lowercase.value) {
-                text = text.toLowerCase();
-            }
 
             function translate(text, from) {
                 var to = options.first.value;
@@ -200,7 +265,7 @@
                 }
                 _translate(text, from, to, options, function(result, text) {
                     if (result.sentences.length > 0) {
-                        if(options.detection.value && 
+                        if(true && 
                            result.sentences[0].trans.toLowerCase() == result.sentences[0].orig.toLowerCase() && 
                            to != options.second.value && to == options.first.value) {
                             return translate(text, options.first.value);
@@ -236,7 +301,6 @@
                     }
                 });
             }
-            
             translate(text, ((options.from.value == 'latest') ? latest : options.from.value));
         }
     </script>
