@@ -1,23 +1,22 @@
 
-services['goo.gl'] = function(options) {
+services['clck.ru'] = function(options) {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://www.googleapis.com/urlshortener/v1/url', true);
+    xhr.open('GET', 'http://clck.ru/--?json=on&url=' + options.url, true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             if (xhr.status < 300 && xhr.status >= 200) {
                 var result = JSON.parse(xhr.responseText);
-                if(result['id']) {
-                    options.callback(result['id']);
+                if(result.length) {
+                    options.callback(result[0]);
                 } else {
-                    options.callbackError(result['error']['message']);
+                    options.callbackError('Unknown error');
                 }
             } else {
                 options.callbackError('Wrong status (' + xhr.status + ')');
             }
         }
     };
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify({longUrl: options.url}));
+    xhr.send(null);
 
     // timeout
     setTimeout(function(){

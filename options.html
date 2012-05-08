@@ -16,6 +16,14 @@
             localStorage['icon'] = icon.alt;
         }
 
+        function changeService(e) {
+            var service = e.srcElement || e;
+            $('service-' + localStorage['service']).className = '';
+            service.className = 'selected';
+            localStorage['service'] = service.innerText;
+            e.defaultPrevented = true;
+        }
+
         function load() {
 
             var i, img;
@@ -35,7 +43,18 @@
                 }
             }
 
+            var services = ['bit.ly', 'goo.gl', 'u.to', 'clck.ru', 'is.gd'], a;
+            for(i = 0; i < services.length; i++) {
+                a = document.createElement('a');
+                a.id = 'service-' + services[i];
+                a.href = '#' + services[i];
+                a.innerText = services[i];
+                a.onclick = changeService;
+                $('serviceWrapper').appendChild(a);
+            }
+
             changeIcon($('icon-' + localStorage['icon']));
+            changeService($('service-' + localStorage['service']));
 
             $('options').style.display = '';
             $('loading').style.display = 'none';
@@ -43,7 +62,7 @@
 
     </script>
     <style type="text/css">
-        html, body { height: 100%; }
+        /*html, body { height: 100%; }*/
         body {
             text-align: center;
             color: #363636;
@@ -77,6 +96,18 @@
         div#iconsWrapper img.selected {
             border: 2px dotted #363636;
         }
+        a {
+            color: #666;
+            font-size: 25px;
+            text-decoration: none;
+            margin: 40px;
+            border-bottom: 2px dotted #DADADA;
+            padding: 10px 3px;
+        }
+        a.selected, a:hover {
+            color: #363636;
+            border-color: #363636;
+        }
     </style>
 </head>
 <body onload="load()">
@@ -84,6 +115,9 @@
   <div id="options" style="display:none;">
     <h2>Choose icon</h2>
     <div id="iconsWrapper"></div>
+    <h2>Choose service</h2>
+    <div id="serviceWrapper">
+    </div>
   </div>
 </body>
 </html>

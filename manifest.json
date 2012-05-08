@@ -1,18 +1,22 @@
 {
- "name": "Chrome-URL-Simplify",
- "version": "1.0",
- "description": "Simplify url with goo.gl",
- "background_page": "simplify.html",
- "options_page": "options.html",
- "permissions": [
-    "tabs",
-    "http://goo.gl/api/url"
- ],
- "icons": {
-    "128": "graphics/icons/01.png"
- },
- "page_action": {
-    "default_icon": "graphics/icons/01.png",
-    "default_title": "Click to simplify and copy to clipboard"
- }
+    "name": "URL Simplify",
+    "version": "2.0.3",
+    "description": "Simplify url with goo.gl, bit.ly, clck.ru, u.to or is.gd",
+    "background_page": "simplify.html",
+    "options_page": "options.html",
+    "permissions": [
+        "tabs",
+        "https://www.googleapis.com/urlshortener/v1/url",
+        "http://is.gd/create.php",
+        "http://u.to/",
+        "http://clck.ru/--",
+        "http://api.bit.ly/v3/shorten"
+    ],
+    "icons": {
+        "128": "graphics/icons/01.png"
+    },
+    "page_action": {
+        "default_icon": "graphics/icons/01.png",
+        "default_title": "Click to simplify and copy to clipboard"
+    }
 }

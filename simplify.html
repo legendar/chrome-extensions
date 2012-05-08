@@ -2,16 +2,22 @@
 <head>
 <script type="text/javascript">
     var services = {};
-    var current = 'goo.gl';
     var timeout = 3;
 
     localStorage['iconsCount'] = 7;
     localStorage['icon'] = parseInt(localStorage['icon'] || 1);
+    localStorage['service'] = localStorage['service'] || 'goo.gl';
 </script>
 <!-- TODO - added more services and load only one of them -->
+<!--<script type="text/javascript">
+    document.write('<script type="text/javascript" src="services/' + localStorage['service'] + '.js"></' + 'script>');
+</script>-->
 <script type="text/javascript" src="services/goo.gl.js"></script>
+<script type="text/javascript" src="services/clck.ru.js"></script>
+<script type="text/javascript" src="services/bit.ly.js"></script>
+<script type="text/javascript" src="services/u.to.js"></script>
+<script type="text/javascript" src="services/is.gd.js"></script>
 <script type="text/javascript">
-
 
     function drawIcon(tab, o) {
         var icon = parseInt(localStorage['icon']);
@@ -59,7 +65,7 @@
         if(!url) return;
         callback = callback || function(){};
         callbackError = callbackError || function(){};
-        services[current]({
+        services[localStorage['service']]({
             url: url,
             callback: callback,
             callbackError: callbackError,
