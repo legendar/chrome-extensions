@@ -1,6 +1,6 @@
 {
     "name": "Auto-Translate",
-    "version": "2.0.2",
+    "version": "2.0.3",
     "description": "Automatically translate selection/mouseover text by google translate",
     "background_page": "translate.html",
     "options_page": "options.html",
