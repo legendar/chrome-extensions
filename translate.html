@@ -127,7 +127,7 @@
             meta: false,
             shift: false,
             selection: true,
-            mouseover: false,
+            mouseover: true,
             theme: 'black',
             service: 'google'
         };
@@ -287,9 +287,8 @@
                     to = options.second;
                 }
                 _translate(text, from, to, options, function(result, text) {
-                    console.log(result);
-                    if(result[8] && result[8][0][0] == to && to == options.first) {
-                        return translate(text, options.first);
+                    if(result[8] && result[8][0][0] == to && to != from) {
+                        return translate(text, to);
                     }
                     latest = result[8] ? result[8][0][0] : from;
                     var text = [], i;
