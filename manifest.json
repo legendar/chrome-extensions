@@ -1,23 +1,23 @@
 {
- "name": "Auto-Translate",
- "version": "1.4.1",
- "description": "Automatically translate selection text by google translate",
- "background_page": "translate.html",
- "options_page": "options.html",
- "permissions": [
-  "tabs", 
-  "http://ajax.googleapis.com/*",
-  "http://*.google.com/*",
-  "http://google.com/*",
-  "http://*/*",
-  "https://*/*"
- ],
- "icons": {
-    "16": "icons/16.png",
-    "32": "icons/32.png",
-    "48": "icons/48.png",
-    "64": "icons/64.png",
-    "128": "icons/128.png",
-    "256": "icons/tranlation.png"
- }
+    "name": "Auto-Translate",
+    "version": "2.0",
+    "description": "Automatically translate selection text by google translate",
+    "background_page": "translate.html",
+    "options_page": "options.html",
+    "permissions": [
+        "tabs",
+        "http://ajax.googleapis.com/*",
+        "http://*.google.com/*",
+        "http://google.com/*",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "icons": {
+        "16": "icons/16.png",
+        "32": "icons/32.png",
+        "48": "icons/48.png",
+        "64": "icons/64.png",
+        "128": "icons/128.png",
+        "256": "icons/translation.png"
+    }
 }

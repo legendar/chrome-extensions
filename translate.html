@@ -120,7 +120,7 @@
 
         var defaults = {
             from: 'auto',
-            first: navigator.language,
+            first: navigator.language.split('-')[0],
             second: 'en',
             ctrl: true,
             alt: false,
@@ -141,7 +141,21 @@
         var options = JSON.parse(localStorage['options']);
         if(!(options instanceof Array)) {
             // TODO convert old options to new format
-            options = [defaults];
+            //options = [defaults];
+            old = options;
+            options = [];
+            for(i in old.hotkeys) {
+                i.split('+');
+                var o = JSON.parse(localStorage['defaults']);
+                o.theme = old.theme;
+                o.from = old.hotkeys[i].from.value || 'auto';
+                old.hotkeys[i].first.value && (o.first = old.hotkeys[i].first.value);
+                o.second = old.hotkeys[i].second.value;
+                i.split('+').forEach(function(k) {
+                    o[k.toLowerCase()] = true;
+                });
+                options.push(o);
+            }
             localStorage['options'] = JSON.stringify(options);
         }
 
@@ -150,33 +164,35 @@
         var themes = {
             'black': '<div style="' +
                         'max-width: 300px !important;' +
-                        'color: #fafafa !important;' +
-                        'opacity: 0.8 !important;' +
-                        'border-color: #000000 !important;' +
+                        'color: #EEE !important;' +
+                        //'opacity: 0.8 !important;' +
+                        'border-color: #111 !important;' +
                         'border-width: 0px !important;' +
-                        '-webkit-border-radius: 10px !important;' +
-                        'background-color: #363636 !important;' +
+                        '-webkit-border-radius: 5px !important;' +
+                        'background-color: rgba(17,17,17,0.9) !important;' +
                         'font-size: 16px !important;' +
                         'padding: 8px !important;' +
                         'overflow: visible !important;' +
-                        'background-image: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #000), color-stop(50%, #363636), color-stop(100%, #000));' +
+                        //'background-image: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #000), color-stop(50%, #363636), color-stop(100%, #000));' +
                         'z-index: 999999 !important;' +
                         'text-align: left  !important;' +
-                      '"><div class="translate"></div><div class="additional"></div></div>',
+                        'box-shadow: #666 2px 2px 2px !important;' +
+                      '"><div class="translation"></div><div class="additional"></div></div>',
             'white': '<div style="' +
                         'max-width: 300px !important;' +
-                        'color: #121212 !important;' +
+                        'color: #111 !important;' +
                         'opacity: 1 !important;' +
-                        'border: 1px solid #363636 !important;' +
-                        '-webkit-border-radius: 10px !important;' +
-                        'background-color: #FFFFFF !important;' +
+                        'border: 1px solid #BBB !important;' +
+                        '-webkit-border-radius: 5px !important;' +
+                        'background-color: rgba(255, 255, 255, 0.9) !important;' +
                         'font-size: 16px !important;' +
                         'padding: 8px !important;' +
                         'overflow: visible !important;' +
-                        'background-image: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #FFF), color-stop(50%, #EEE), color-stop(100%, #FFF));' +
+                        //'background-image: -webkit-gradient(linear, left top, right bottom, color-stop(0%, #FFF), color-stop(50%, #EEE), color-stop(100%, #FFF));' +
                         'z-index: 999999 !important;' +
                         'text-align: left  !important;' +
-                      '"><div class="translate"></div><div class="additional"></div></div>',
+                        'box-shadow: #AAA 2px 2px 2px !important;' +
+                      '"><div class="translation"></div><div class="additional"></div></div>',
             'customize': '',
         };
 
@@ -188,18 +204,23 @@
             options.theme = 'black';
         }*/
 
-        var holds = [];
+        var holds, holdsMap;
         var keys = ['Ctrl', 'Alt', 'Shift', 'Meta'];
+        function pushHold(hold, o) {
+            holds.push(hold);
+            holdsMap[hold] = o;
+        }
         function load() {
+            holds = [], holdsMap = {};
             options = JSON.parse(localStorage['options']);
             hotkeys = [];
             options.forEach(function(o){
                 var h = [];
                 keys.forEach(function(k){
-                    o[k] && h.push(k);
+                    o[k.toLowerCase()] && h.push(k);
                 });
-                o.selection && holds.push(h.join('+') + '+Selection');
-                o.mouseover && holds.push(h.join('+') + '+Mouseover');
+                o.selection && pushHold(h.join('+') + '+Selection', o);
+                o.mouseover && pushHold(h.join('+') + '+Mouseover', o);
             });
         }
         load();
@@ -210,11 +231,11 @@
             if(scheme == 'https' || scheme == 'http:') {
                 //var theme = "window['-chrome-auto-translate-core-data-theme'] = '" + themes[options.theme] + (scheme == 'https' ? brandingS : branding) + "';";
                 var theme = '';
-                chrome.tabs.executeScript(tabId, {code: theme, allFrames: true}, function() {
+                //chrome.tabs.executeScript(tabId, {code: theme, allFrames: true}, function() {
                     chrome.tabs.executeScript(tabId, {code: 'var holds = ' + JSON.stringify(holds), allFrames: true}, function() {
                         chrome.tabs.executeScript(tabId, {file: 'inject.js', allFrames: true});
                     });
-                });
+                //});
             }
         });
 
@@ -222,9 +243,10 @@
             port.onMessage.addListener(function(m) {
                 switch(m.message) {
                     case 'translate':
-                        var options = JSON.parse(localStorage['options']);
-                        if(options['hotkeys'][m.hotkeys]) {
-                            translate(m.text, port, options['hotkeys'][m.hotkeys]);
+                        var options;
+                        if(options = holdsMap[m.context.hotkeys]) {
+                            m.context.theme = themes[options.theme]
+                            translate(m.context.text, port, options, m.context);
                         }
                         break;
                     case 'options':
@@ -238,9 +260,9 @@
 
         function _translate(text, from, to, options, callback) {
             //var url = 'http://translate.google.com/translate_a/t?client=t&otf=1&pc=0';
-            var url = 'http://translate.google.com/translate_a/t?client=f&otf=1&pc=0';
+            var url = 'http://translate.google.com/translate_a/t?client=t';
             url += '&text=' + text;
-            url += '&hl=' + options.first.value;
+            url += '&hl=' + options.first;
             if(from != 'auto') {
                 url += '&sl=' + from;
             }
@@ -250,58 +272,52 @@
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
                     // JSON.parse does not evaluate the attacker's scripts.
-                    callback(JSON.parse(xhr.responseText), text);
+                    var r; eval('r = ' + xhr.responseText)
+                    callback(r, text);
                 }
             }
             xhr.send();
         }
 
-        function translate(text, port, options) {
+        function translate(text, port, options, context) {
 
             function translate(text, from) {
-                var to = options.first.value;
+                var to = options.first;
                 if(from == to) {
-                    to = options.second.value;
+                    to = options.second;
                 }
                 _translate(text, from, to, options, function(result, text) {
-                    if (result.sentences.length > 0) {
-                        if(true && 
-                           result.sentences[0].trans.toLowerCase() == result.sentences[0].orig.toLowerCase() && 
-                           to != options.second.value && to == options.first.value) {
-                            return translate(text, options.first.value);
-                        }
-                        latest = result.src;
-                        var text = '';
-                        for(i in result.sentences) {
-                            if(text.length != 0) {
-                                text += ' ';
-                            }
-                            text += result.sentences[i].trans;
-                        }
-                        var textAdditional = null;
-                        if(result.dict && result.dict.length > 0) {
-                            if(text.length != 0) {
-                                text += '<br />';
-                            }
-                            textAdditional = '';
-                            for(dict in result.dict) {
-                                if(result.dict[dict].pos.length > 0) {
-                                    textAdditional += '<b>' + result.dict[dict].pos + '</b> ';
-                                }
-                                textAdditional += '<i>' + result.dict[dict].terms.join(', ') + '</i><br />';
-                            }
-                        }
-                        port.postMessage({
-                            message: 'result',
-                            result: {
-                                text: text,
-                                textAdditional: textAdditional
-                            }
-                        });
+                    console.log(result);
+                    if(result[8] && result[8][0][0] == to && to == options.first) {
+                        return translate(text, options.first);
                     }
+                    latest = result[8] ? result[8][0][0] : from;
+                    var text = [], i;
+                    for(i=0; i<result[0].length; i++) {
+                        text.push(result[0][i][0]);
+                    }
+                    text = text.join('');
+                    var additional = '';
+                    if(result[1]) {
+                        for(i=0; i<result[1].length; i++) {
+                            if(result[1][i][0].length) {
+                                additional += '<div><b>' + result[1][i][0] + '</b>: ';
+                                additional += '<i>' + result[1][i][1].join(', ') + '</i></div>';
+                            } else {
+                                text += ', ' + result[1][i][1].join(', ');
+                            }
+                        }
+                    }
+
+                    context.translation = text;
+                    context.additional = additional;
+                    port.postMessage({
+                        message: 'result',
+                        context: context
+                    });
                 });
             }
-            translate(text, ((options.from.value == 'latest') ? latest : options.from.value));
+            translate(text, ((options.from == 'latest') ? latest : options.from));
         }
     </script>
 </head>

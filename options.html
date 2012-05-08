@@ -21,7 +21,7 @@
         }
 
         function add(set, index) {
-            index || (set = defaults, index = 0);
+            index == undefined && (set = defaults, index = 0);
             var tpl = document.getElementsByClassName('set')[0], out;
             out = tpl.cloneNode(true);
             Array.prototype.slice.call(out.getElementsByTagName('select')).forEach(function(select, index){
@@ -50,7 +50,6 @@
             });
             out.getElementsByTagName('select')[0].addEventListener('change', function(e){
                 if(['latest', 'auto'].indexOf(this.value) == -1) {
-                    console.log(this.parentNode.getElementsByTagName('select')[2]);
                     this.parentNode.parentNode.getElementsByTagName('select')[2].value = this.value;
                 }
             });
@@ -60,10 +59,9 @@
 
         function save() {
 
-            var ops = [];
-            var set = {};
-            Array.prototype.slice.call(document.getElementsByClassName('set')).forEach(function(out, index){
-                if(index == 0) return;
+            var ops = [], set;
+            Array.prototype.slice.call(document.getElementsByClassName('set'), 1).forEach(function(out, index){
+                set = {};
                 Array.prototype.slice.call(out.getElementsByTagName('select')).forEach(function(select, index){
                     set[selects[index]] = select.value;
                 });
@@ -74,7 +72,6 @@
             });
 
             // TODO check options
-
             message('Options saved');
             options = ops;
             localStorage['options'] = JSON.stringify(options);
@@ -222,11 +219,16 @@
             margin: 10px auto;
             background: #E1E6EE;
             border: 1px solid #B8CBDE;
-            -webkit-border-radius: 15px;
+            -webkit-border-radius: 10px;
             font-weight: bold;
             font-size: 24px;
             padding: 6px;
             cursor: pointer;
+        }
+        span.save:active {
+            position: relative;
+            top: 1px;
+            left: 1px;
         }
         span.save:hover {
             color: #000000;
@@ -234,6 +236,19 @@
 
         select {
             display: block;
+        }
+
+        .faq {
+            margin-top: 50px;
+            font-style: italic;
+            font-size: 1.5em;
+        }
+        .faq b {
+            font-style: normal;
+        }
+
+        .faq div:nth-child(even) {
+            margin-top: 10px;
         }
 
     </style>
@@ -299,6 +314,13 @@
         </div>
     </div>
     <span class="save" onclick="save(); return false;">Save</span>
+    <div class="faq">
+        <h1>FAQ</h1>
+        <div><b>Q:</b> How to translate words on dblclick?</div>
+        <div><b>A:</b> Disable all hotkeys and leave check only on 'selection'</div>
+        <div><b>Q:</b> How to translate words on mouseover?</div>
+        <div><b>A:</b> Disable all hotkeys and leave check only on 'mouseover'</div>
+    </div>
   </div>
 </body>
 </html>

@@ -1,8 +1,8 @@
 
-var holds = [
+/*var holds = [
     'Ctrl+Alt+Selection',
     'Ctrl+Alt+Mouseover',
-];
+];*/
 
 var popupOffset = 5; //px
 
@@ -10,6 +10,8 @@ var mouseoverDelay = 300;
 
 function $(id){return document.getElementById(id)};
 
+// for sync async =)
+var async = 0;
 
 var popup;
 
@@ -19,9 +21,10 @@ function createPopup(){
 
     popup.style.position = 'absolute';
     popup.style.display = 'none';
-    popup.style.background = '#999';
+    //popup.style.background = '#999';
+    popup.style.zIndex = 9999;
+    popup.style.fontSize = '1em';
 
-    document.body.appendChild(popup);
 
 }
 
@@ -30,10 +33,14 @@ var popupOffset = 5;
 function showPopup(context) {
     popup || createPopup();
 
-    popup.innerHTML = context.translation;
-    popup.style.display = '';
+    popup.innerHTML = context.theme;
 
-    //console.log(popup.offsetHeight + 10, context.rect.y);
+    popup.getElementsByClassName('translation')[0].innerHTML = context.translation;
+    popup.getElementsByClassName('additional')[0].innerHTML = context.additional;
+
+    popup.style.display = '';
+    document.body.appendChild(popup);
+
     if((popup.offsetHeight + popupOffset) < context.rect.y) {
         // top
         popup.style.top = context.rect.y - popup.offsetHeight - popupOffset + 'px';
@@ -42,11 +49,33 @@ function showPopup(context) {
         popup.style.top = context.rect.y + context.rect.h + popupOffset + 'px';
     }
 
-    popup.style.left = context.rect.x + context.rect.w / 2 - popup.offsetWidth / 2 + 'px';
+    var l = context.rect.x + context.rect.w / 2 - popup.offsetWidth / 2;
+    l = Math.min(l, document.body.clientWidth - popup.offsetWidth - popupOffset);
+    l = Math.max(l, popupOffset);
+    popup.style.left = l + 'px';
+
+    /*var a = document.createElement('div');
+    a.style.left = context.rect.x + 'px';
+    a.style.top = context.rect.y + 'px';
+    a.style.width = context.rect.w + 'px';
+    a.style.height = context.rect.h + 'px';
+    a.style.position = 'absolute';
+    a.style.zIndex = 9999;
+    a.style.boxSizing = 'border-box';
+    a.style.border = '1px solid red';
+    document.body.appendChild(a);*/
 }
 
 var port = chrome.extension.connect();
-port.onMessage.addListener(showPopup);
+port.onMessage.addListener(function(m) {
+    switch(m.message) {
+        case "result":
+            if(m.context.async === async) {
+                showPopup(m.context);
+            }
+            break;
+    }
+});
 
 var keys = ['Ctrl', 'Alt', 'Shift', 'Meta'];
 function invoke(e, type) {
@@ -68,9 +97,16 @@ function invoke(e, type) {
     if(holds.indexOf(hs) >= 0 && type == 'mouseup') {
 
         // get translation
-        text = window.getSelection().toString();
+        var selection = window.getSelection();
+        text = selection.toString();
+        var bcr = selection.getRangeAt(0).getBoundingClientRect();
+        rect = {
+            x: bcr.left + window.pageXOffset,
+            y: bcr.top + window.pageYOffset,
+            w: bcr.width,
+            h: bcr.height
+        };
         hotkeys = hs;
-
     }
 
     if(holds.indexOf(hm) >= 0 && type == 'mouseover') {
@@ -87,19 +123,21 @@ function invoke(e, type) {
         return;
     }
 
-    showPopup({
+    /*showPopup({
         translation: text,
         hotkeys: hotkeys,
         rect: rect
-    });
+    });*/
 
-    /*port.postMessage({
+    port.postMessage({
         message: 'translate',
         context: {
+            text: text,
             hotkeys: hotkeys,
-            rect: rect
+            rect: rect,
+            async: ++async
         }
-    });*/
+    });
 
 }
 
@@ -121,18 +159,20 @@ document.body.addEventListener('mousemove', function(e) {
 
 document.body.addEventListener('mousedown', function(e){
     // hide popup
-    return;
+    if(!popup || !popup.parentNode) return;
+    //return;
     var r = true;
     e = e.srcElement;
     while(e.parentNode) {
-        if(e.id == '-chrome-auto-translate-plugin-dialog') {
+        if(e === popup) {
             r = false;
             break;
         }
         e = e.parentNode;
     }
     if(r) {
-        document.getElementById('-chrome-auto-translate-plugin-dialog').style.display = 'none';
+        popup.style.display = 'none';
+        popup.parentNode.removeChild(popup);
     }
 }, false);
 
