@@ -30,16 +30,27 @@ function createPopup(){
 
 var popupOffset = 5;
 
+function resetStyles(el) {
+    el.style.color = 'inherit';
+    el.style.background = 'none';
+    el.style.border = 'none';
+}
+
 function showPopup(context) {
     popup || createPopup();
 
-    popup.innerHTML = context.theme;
-
-    popup.getElementsByClassName('translation')[0].innerHTML = context.translation;
-    popup.getElementsByClassName('additional')[0].innerHTML = context.additional;
-
     popup.style.display = '';
     document.body.appendChild(popup);
+
+    popup.innerHTML = context.theme;
+
+    resetStyles(popup.getElementsByClassName('translation')[0]);
+    resetStyles(popup.getElementsByClassName('additional')[0]);
+    popup.getElementsByClassName('translation')[0].innerHTML = context.translation;
+    popup.getElementsByClassName('additional')[0].innerHTML = context.additional;
+    Array.prototype.slice.call(popup.getElementsByClassName('additional')[0].getElementsByTagName('div')).forEach(function(el) {
+        resetStyles(el);
+    });
 
     if((popup.offsetHeight + popupOffset) < context.rect.y) {
         // top
