@@ -1,4 +1,3 @@
-
 /*var holds = [
     'Ctrl+Alt+Selection',
     'Ctrl+Alt+Mouseover',
@@ -110,13 +109,18 @@ function invoke(e, type) {
         // get translation
         var selection = window.getSelection();
         text = selection.toString();
-        var bcr = selection.getRangeAt(0).getBoundingClientRect();
-        rect = {
-            x: bcr.left + window.pageXOffset,
-            y: bcr.top + window.pageYOffset,
-            w: bcr.width,
-            h: bcr.height
+        try {
+            var bcr = selection.getRangeAt(0).getBoundingClientRect();
+            rect = {
+                x: bcr.left + window.pageXOffset,
+                y: bcr.top + window.pageYOffset,
+                w: bcr.width,
+                h: bcr.height
+            };
+        } catch (er) {
+            // Optional console.error() call
         };
+        
         hotkeys = hs;
     }
 
