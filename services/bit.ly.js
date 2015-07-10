@@ -1,7 +1,7 @@
 
 services['bit.ly'] = function(options) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://api.bit.ly/v3/shorten?format=json&apikey=R_8f0a190da4203b72c58e52af8b169b98&login=o_659hr4ae8j&uri=' + options.url, true);
+    xhr.open('GET', 'http://api.bit.ly/v3/shorten?format=json&apikey=R_8f0a190da4203b72c58e52af8b169b98&login=o_659hr4ae8j&uri=' + encodeURIComponent(options.url), true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             if (xhr.status < 300 && xhr.status >= 200) {

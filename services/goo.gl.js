@@ -1,7 +1,8 @@
 
 services['goo.gl'] = function(options) {
+    var apiKey = 'AIzaSyBwRf6A2_iAUSTBg933UOY5OI6Ul1oFWQ4'
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://www.googleapis.com/urlshortener/v1/url', true);
+    xhr.open('POST', 'https://www.googleapis.com/urlshortener/v1/url?key=' + apiKey, true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             if (xhr.status < 300 && xhr.status >= 200) {

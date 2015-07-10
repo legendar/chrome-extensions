@@ -1,7 +1,7 @@
 
 services['is.gd'] = function(options) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://is.gd/create.php?format=json&url=' + options.url, true);
+    xhr.open('GET', 'http://is.gd/create.php?format=json&url=' + encodeURIComponent(options.url), true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             if (xhr.status < 300 && xhr.status >= 200) {

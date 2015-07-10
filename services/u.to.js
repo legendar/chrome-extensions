@@ -16,7 +16,7 @@ services['u.to'] = function(options) {
             }
         }
     };
-    xhr.send('a=add&url=' + options.url);
+    xhr.send('a=add&url=' + encodeURIComponent(options.url));
 
     // timeout
     setTimeout(function(){

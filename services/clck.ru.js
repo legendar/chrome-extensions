@@ -1,7 +1,7 @@
 
 services['clck.ru'] = function(options) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://clck.ru/--?json=on&url=' + options.url, true);
+    xhr.open('GET', 'https://clck.ru/--?json=on&url=' + encodeURIComponent(options.url), true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             if (xhr.status < 300 && xhr.status >= 200) {
