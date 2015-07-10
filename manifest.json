@@ -1,7 +1,7 @@
 {
     "name": "URL Simplify",
     "version": "2.3",
-    "description": "Simplify url with goo.gl, bit.ly, clck.ru, u.to or is.gd",
+    "description": "Simplify url with goo.gl, bit.ly, j.mp, clck.ru, u.to, is.gd or g.ua",
     "manifest_version": 2,
     "background": {
         "page": "simplify.html"
