@@ -8,35 +8,33 @@
     function drawIcon(tab, o) {
         var icon = parseInt(localStorage['icon']);
         var icon_src = 'graphics/icons/' + (icon < 10 ? '0' : '') + icon + '.png';
+        //var icon_src = 'graphics/loader.png';
         chrome.pageAction.setIcon({tabId: tab.id, path: icon_src});
     }
 
-    /*function animateIcon(tab, frame) {
-
+    var animationTimer;
+    function animateIcon(tab, frame) {
         frame = frame || 0;
-        if(frame == 6) {
+        if(frame == 12) {
             frame = 0;
-        } //else {
-            setTimeout(function(){animateIcon(tab, frame + 1);}, 90);
-        //}
+        }
 
         var cv = document.getElementById('canvas'),
             cc = cv.getContext('2d'),
-            l = document.getElementById('logo'),
             r = document.getElementById('loader');
-
-        //r.style.backgroundPosition = '0 ' + (80 - frame * 16) + 'px';
 
         cc.save();
         cc.clearRect(0, 0, cv.width, cv.height);
-        cc.drawImage(l, 0, 0, cv.width, cv.height);
-        cc.drawImage(r, 0, 0 - frame * 16, r.width, r.height);
+        cc.drawImage(r, 0, 0 - frame * 19, r.width, r.height);
         cc.restore();
 
-        //chrome.pageAction.setIcon({tabId: tab.id, imageData:cc.getImageData(0, 0, cv.width, cv.height)});
-        chrome.browserAction.setIcon({tabId: tab.id, imageData:cc.getImageData(0, 0, cv.width, cv.height)});
+        chrome.pageAction.setIcon({tabId: tab.id, imageData:cc.getImageData(0, 0, cv.width, cv.height)});
 
-    }*/
+        animationTimer = setTimeout(function(){animateIcon(tab, frame + 1);}, 90);
+    }
+    function stopAnimation() {
+      clearTimeout(animationTimer)
+    }
 
     function simplify(url, callback, callbackError) {
         if(!url) return;
@@ -62,9 +60,11 @@
     });
 
     chrome.pageAction.onClicked.addListener(function(tab){
+        animateIcon(tab)
         simplify(tab.url, function(result) {
             chrome.pageAction.setTitle({tabId: tab.id, title: 'URL Simplified (' + result + ')'});
-            drawIcon(tab, 1.0);
+            stopAnimation();
+            drawIcon(tab);
             with(document.getElementById('field')) {
                 value = result;
                 focus();
@@ -73,7 +73,7 @@
             // copy to clipboard
             document.execCommand('Copy');
         }, function(result) {
-            chrome.pageAction.setTitle({tabId: tab.id, title: tab.url + '; Error! ' + result});
+            chrome.pageAction.setTitle({tabId: tab.id, title: 'Error! ' + result});
             console.log('Can\'t simplify url: ' + tab.url + '. ' + result);
         });
     });
