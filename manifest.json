@@ -1,6 +1,6 @@
 {
     "name": "URL Simplify",
-    "version": "2.1",
+    "version": "2.2",
     "description": "Simplify url with goo.gl, bit.ly, clck.ru, u.to or is.gd",
     "manifest_version": 2,
     "background": {
