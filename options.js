@@ -36,7 +36,7 @@ function load() {
         }
     }
 
-    var services = ['bit.ly', 'goo.gl', 'u.to', 'clck.ru', 'is.gd'], a;
+    var services = ['bit.ly', 'j.mp', 'goo.gl', 'u.to', 'clck.ru', 'is.gd', 'g.ua'], a;
     for(i = 0; i < services.length; i++) {
         a = document.createElement('a');
         a.id = 'service-' + services[i];

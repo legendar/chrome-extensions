@@ -12,8 +12,9 @@
         "https://www.googleapis.com/urlshortener/v1/url",
         "http://is.gd/create.php",
         "http://u.to/",
-        "http://clck.ru/--",
-        "http://api.bit.ly/v3/shorten"
+        "https://clck.ru/--",
+        "http://api.bit.ly/v3/shorten",
+        "http://g.ua/"
     ],
     "icons": {
         "128": "graphics/icons/01.png"
