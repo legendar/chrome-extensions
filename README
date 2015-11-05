@@ -2,6 +2,7 @@ This repository containts following chrome extesions:
 
     - Auto-fill enhancer
     - Url simplify
+    - Quick Translate
 
 Every extensions has own branch. So run 'git branch' to list the branches and 'git checkout branchname' for get source-code for every extension
 
