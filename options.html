@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Quick Translate :: Options</title>
+    <script src="options.js"></script>
+    <script src="services/gtr.js"></script>
+    <script src="services/ytr.js"></script>
+    <style type="text/css">
+        html, body { height: 100%; }
+        body {
+            text-align: center;
+            color: #363636;
+            margin: 0; padding: 0;
+            font-family: 'Tahoma';
+        }
+
+        .wrapper {
+            width: 600px;
+            margin: 10px auto;
+            text-align: left;
+        }
+
+        .comment {
+            display: block;
+            margin: 4px 0 10px;
+        }
+
+        .faq {
+            margin-top: 100px;
+            padding-bottom: 20px;
+        }
+        .faq b {
+            font-style: normal;
+        }
+
+        .faq div:nth-child(even) {
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h2 data-i18n="o_langs">Languages</h2>
+    <span data-i18n="o_lang">First</span>: <select id="lang"></select>
+    <span data-i18n="o_second">Second</span>: <select id="second"></select>
+    <i class="comment" data-i18n="o_langs_desc">First language is your native language. When text to translate detects in your native language then it will translate to second language.</i>
+
+    <h2 data-i18n="o_controls">Controls</h2>
+    <label><input type="checkbox" id="hover" />
+    <i data-i18n="o_hover_label">Translate word under cursor on hover/mouseover</i>
+    </label>
+    <i class="comment" data-i18n="o_hover_desc">(however, you can always translate by hold hotkey and select text)</i>
+    <div>
+        <span data-i18n="o_keys_label">Hotkeys</span>:
+        <label><input type="checkbox" id="ctrlKey" /> Ctrl<label>
+        <label><input type="checkbox" id="altKey" /> Alt<label>
+        <label><input type="checkbox" id="shiftKey" /> Shift<label>
+        <label><input type="checkbox" id="metaKey" /> Meta<label>
+        <i class="comment" data-i18n="o_keys_desc">You can disable all hotkeys. Then text will translate immediately when you select it or hover (not recomended in conjunction with hover function).</i>
+    </div>
+
+    <h2 data-i18n="o_appearance">Appearance</h2>
+    <label><input type="checkbox" id="simple" /> <span data-i18n="o_popup_simple">Simple dialog</span></label>
+    <i class="comment" data-i18n="o_popup_desc">Simple dialog shows only translation without header that contains lang panel.</i>
+
+
+    <div class="faq">
+        <h1 data-i18n="o_faq">FAQ</h1>
+        <div><b data-i18n="o_faq_q">Q:</b> <span data-i18n="o_faq_q_1">How to translate words on dblclick?</span></div>
+        <div><b data-i18n="o_faq_a">A:</b> <span data-i18n="o_faq_a_1">Disable all hotkeys and hover function</span></div>
+        <div><b data-i18n="o_faq_q">Q:</b> <span data-i18n="o_faq_q_2">How to translate words on mouseover?</span></div>
+        <div><b data-i18n="o_faq_a">A:</b> <span data-i18n="o_faq_a_2">Disable all hotkeys and but leave hover function</span></div>
+        <div><b data-i18n="o_faq_q">Q:</b> <span data-i18n="o_faq_q_3">How to translate words on mouseover?</span></div>
+        <div><b data-i18n="o_faq_a">A:</b> <span data-i18n="o_faq_a_3">Disable all hotkeys and but leave hover function</span></div>
+    </div>
+  </div>
+  <!--<script src="options_action.js"></script>
+  <script src="action.js"></script>-->
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+    "manifest_version": 2,
+    "name": "Quick Translate",
+    "version": "0.9",
+    "author": "Yaroslav Shulika <legendar@gmail.com>",
+    "description": "__MSG_description__",
+    "background": {
+        "scripts" : ["app.js", "services/gtr.js", "services/ytr.js"],
+        "persistent": true
+    },
+    "permissions": [
+        "tabs",
+        "tts",
+        "http://ajax.googleapis.com/*",
+        "http://*.google.com/*",
+        "http://google.com/*",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "icons": {
+        "16": "icons/16.png",
+        "48": "icons/48.png",
+        "128": "icons/128.png"
+    },
+    "web_accessible_resources": ["img/*", "icons/*"],
+    "default_locale": "en",
+    "options_page": "options.html"
+}
