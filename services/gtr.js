@@ -12,25 +12,21 @@ services.gtr = {
     },
 
     sendRequest: function(data, callback) {
-        /*
-        https://translate.google.com.ua/translate_a/single
-        ?client=t
-
-        &sl=en&tl=ru&hl=ru
-        
-        &dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&dt=at
-
-        &ie=UTF-8&oe=UTF-8
-
-        &otf=2&srcrom=1&ssel=0&tsel=0&kc=1&tk=519466|811264&q=hello
-        */
         //console.log(data, callback)
-        var url = 'http://translate.google.com/translate_a/single?client=t&ie=UTF-8&oe=UTF-8',
+        //https://translate.google.com.ua/translate_a/single
+        //?client=t& // gtx = google translate extension
+        //sl=en&tl=ru&hl=ru
+        //&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t
+        //&ie=UTF-8&oe=UTF-8
+        //&otf=1&ssel=0&tsel=0&kc=4&tk=626934.1025426
+        //&q=ok%20how%20are%20you
+        var url = 'http://translate.google.com/translate_a/single?client=gtx&ie=UTF-8&oe=UTF-8',
             post = data.text.length > 100;
         //'&sc=2&ie=UTF-8&oe=UTF-8&uptl=en&alttl=ru&oc=1&otf=2&ssel=0&tsel=6&q=hi';
-        url += '&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&dt=at'
-        post || (url += '&q=' + encodeURIComponent(data.text));
+        url += '&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t'
         url += '&hl=' + data.lang;
+        url += '&otf=1&ssel=0&tsel=0&kc=4&tk=626934.1025426'
+        post || (url += '&q=' + encodeURIComponent(data.text));
         //if(data.from != 'auto') {
             url += '&sl=' + data.from;
         //}

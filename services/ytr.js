@@ -34,7 +34,7 @@ services.ytr = {
     // http://translate.yandex.net/dicservice.json/lookup?callback=ya_.json.c(42)&ui=ru&text=defined&lang=en-ru&flags=1
 
     sendRequestTranslate: function(data, callback) {
-        var url = 'http://translate.yandex.net/api/v1/tr.json/translate?srv=tr-text&id=c9a7d780-10-0&reason=paste'
+        var url = 'http://translate.yandex.net/api/v1/tr.json/translate?srv=tr-text&id=f3db03cf.574ede21.89a7ad76-9-0&reason=auto'
         //url += '&text=' + encodeURIComponent(data.text);
         if(data.from != 'auto') {
             url += '&lang=' + data.from + '-' + data.to;

@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Quick Translate",
-    "version": "0.9",
+    "version": "0.10",
     "author": "Yaroslav Shulika <legendar@gmail.com>",
     "description": "__MSG_description__",
     "background": {
